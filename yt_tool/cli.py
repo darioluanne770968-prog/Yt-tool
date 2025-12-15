@@ -57,8 +57,11 @@ def transcript(url, timestamps, output):
 @cli.command()
 @click.argument("url")
 @click.option("--language", "-l", default="中文", help="Output language")
+@click.option("--style", "-s", default="default",
+              type=click.Choice(["default", "brief", "detailed", "bullets", "academic", "casual", "twitter"]),
+              help="Summary style")
 @click.option("--output", "-o", help="Output file path")
-def summary(url, language, output):
+def summary(url, language, style, output):
     """Generate AI summary of a YouTube video"""
     from .extractor import TranscriptExtractor
     from .summarizer import Summarizer
@@ -81,17 +84,17 @@ def summary(url, language, output):
             extractor.extract()
             transcript_text = extractor.get_plain_text()
 
-            progress.update(task, description="Generating summary...")
+            progress.update(task, description=f"Generating {style} summary...")
 
             summarizer = Summarizer()
-            result = summarizer.summarize(transcript_text, language)
+            result = summarizer.summarize(transcript_text, language, style)
 
             if output:
                 with open(output, "w", encoding="utf-8") as f:
                     f.write(result)
                 console.print(f"[green]Summary saved to {output}[/green]")
             else:
-                console.print(Panel(Markdown(result), title="Video Summary", border_style="green"))
+                console.print(Panel(Markdown(result), title=f"Video Summary ({style})", border_style="green"))
 
         except Exception as e:
             console.print(f"[red]Error: {e}[/red]")
@@ -494,6 +497,292 @@ def batch_process(urls, file_path, playlist, language, output_dir):
         for r in results:
             if not r.get("success"):
                 console.print(f"  - {r.get('url', r.get('video_id'))}: {r.get('error')}")
+
+
+@cli.command()
+@click.argument("url")
+@click.option("--output", "-o", help="Output file path")
+def info(url, output):
+    """Get video information and metadata"""
+    from .video_info import VideoInfo
+
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        console=console,
+    ) as progress:
+        progress.add_task("Fetching video info...", total=None)
+
+        try:
+            video = VideoInfo(url)
+            video.fetch()
+
+            if output:
+                content = video.format_markdown()
+                with open(output, "w", encoding="utf-8") as f:
+                    f.write(content)
+                console.print(f"[green]Video info saved to {output}[/green]")
+            else:
+                # Display as table
+                info = video.info
+                table = Table(title=info["title"], show_header=False)
+                table.add_column("Field", style="cyan")
+                table.add_column("Value", style="white")
+
+                table.add_row("Channel", info["channel"])
+                table.add_row("Duration", info["duration_formatted"])
+                table.add_row("Views", f"{info['view_count']:,}")
+                table.add_row("Likes", f"{info.get('like_count', 0):,}")
+                table.add_row("Upload Date", info["upload_date"])
+                table.add_row("URL", info["url"])
+
+                if info.get("tags"):
+                    table.add_row("Tags", ", ".join(info["tags"][:5]))
+
+                console.print(table)
+
+        except Exception as e:
+            console.print(f"[red]Error: {e}[/red]")
+            raise SystemExit(1)
+
+
+@cli.command()
+@click.argument("url")
+@click.option("--format", "-f", "fmt", default="srt", type=click.Choice(["srt", "vtt", "txt"]))
+@click.option("--output-dir", "-d", default="output", help="Output directory")
+def subtitle(url, fmt, output_dir):
+    """Download subtitles in SRT/VTT/TXT format"""
+    from .extractor import TranscriptExtractor
+    from .subtitle import SubtitleExporter
+
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        console=console,
+    ) as progress:
+        progress.add_task("Extracting subtitles...", total=None)
+
+        try:
+            extractor = TranscriptExtractor(url)
+            extractor.extract()
+
+            exporter = SubtitleExporter(
+                extractor.get_segments(),
+                extractor.video_id,
+            )
+
+            filepath = exporter.save(output_dir, fmt)
+            console.print(f"[green]Subtitle saved to: {filepath}[/green]")
+
+        except Exception as e:
+            console.print(f"[red]Error: {e}[/red]")
+            raise SystemExit(1)
+
+
+@cli.command()
+@click.argument("url")
+@click.option("--format", "-f", "fmt", default="mp3", type=click.Choice(["mp3", "m4a", "wav"]))
+@click.option("--quality", "-q", default="192", type=click.Choice(["128", "192", "256", "320"]))
+@click.option("--output-dir", "-d", default="output", help="Output directory")
+def audio(url, fmt, quality, output_dir):
+    """Download audio from a YouTube video"""
+    from .downloader import Downloader
+    from .extractor import extract_video_id
+
+    video_id = extract_video_id(url)
+    if not video_id:
+        console.print("[red]Invalid YouTube URL[/red]")
+        raise SystemExit(1)
+
+    console.print(f"[dim]Downloading audio as {fmt} ({quality}kbps)...[/dim]")
+
+    try:
+        downloader = Downloader(output_dir)
+        filepath = downloader.download_audio(video_id, fmt, quality)
+        console.print(f"[green]Audio saved to: {filepath}[/green]")
+
+    except Exception as e:
+        console.print(f"[red]Error: {e}[/red]")
+        raise SystemExit(1)
+
+
+@cli.command()
+@click.argument("url")
+@click.option("--language", "-l", default="中文", help="Output language")
+@click.option("--format", "-f", "fmt", default="markdown",
+              type=click.Choice(["markdown", "mermaid", "json"]))
+@click.option("--output", "-o", help="Output file path")
+def mindmap(url, language, fmt, output):
+    """Generate mind map from video content"""
+    from .extractor import TranscriptExtractor
+    from .mindmap import MindmapGenerator
+    from .config import Config
+
+    valid, msg = Config.validate()
+    if not valid:
+        console.print(f"[red]{msg}[/red]")
+        raise SystemExit(1)
+
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        console=console,
+    ) as progress:
+        task = progress.add_task("Extracting transcript...", total=None)
+
+        try:
+            extractor = TranscriptExtractor(url)
+            extractor.extract()
+            transcript_text = extractor.get_plain_text()
+
+            progress.update(task, description="Generating mind map...")
+
+            generator = MindmapGenerator()
+            mindmap_data = generator.generate(transcript_text, language)
+
+            if fmt == "mermaid":
+                result = generator.to_mermaid(mindmap_data)
+            elif fmt == "json":
+                result = generator.to_json(mindmap_data)
+            else:
+                result = generator.to_markdown(mindmap_data)
+
+            if output:
+                with open(output, "w", encoding="utf-8") as f:
+                    f.write(result)
+                console.print(f"[green]Mind map saved to {output}[/green]")
+            else:
+                console.print(Panel(Markdown(result), title="Mind Map", border_style="cyan"))
+
+        except Exception as e:
+            console.print(f"[red]Error: {e}[/red]")
+            raise SystemExit(1)
+
+
+@cli.command("styles")
+def list_styles():
+    """List available summary styles"""
+    from .summarizer import Summarizer
+
+    styles = Summarizer.get_available_styles()
+
+    table = Table(title="Available Summary Styles")
+    table.add_column("Style", style="cyan")
+    table.add_column("Name", style="green")
+    table.add_column("Description", style="white")
+
+    for key, info in styles.items():
+        table.add_row(key, info["name"], info["description"])
+
+    console.print(table)
+    console.print("\n[dim]Use: yt-tool summary URL --style STYLE[/dim]")
+
+
+@cli.command()
+@click.argument("url")
+@click.option("--max-comments", "-n", default=50, help="Maximum comments to analyze")
+@click.option("--language", "-l", default="中文", help="Output language")
+@click.option("--output", "-o", help="Output file path")
+def comments(url, max_comments, language, output):
+    """Analyze video comments"""
+    from .comments import CommentsAnalyzer
+    from .config import Config
+
+    valid, msg = Config.validate()
+    if not valid:
+        console.print(f"[red]{msg}[/red]")
+        raise SystemExit(1)
+
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        console=console,
+    ) as progress:
+        task = progress.add_task("Fetching comments...", total=None)
+
+        try:
+            from .extractor import extract_video_id
+            video_id = extract_video_id(url)
+
+            analyzer = CommentsAnalyzer()
+
+            progress.update(task, description="Analyzing comments...")
+            result = analyzer.analyze_video(video_id, max_comments, language)
+
+            if result["comments_count"] == 0:
+                console.print("[yellow]No comments found for this video[/yellow]")
+                return
+
+            # Show statistics
+            sentiment = analyzer.get_sentiment_summary(result["comments"])
+            table = Table(title=f"Comments Analysis ({result['comments_count']} comments)")
+            table.add_column("Metric", style="cyan")
+            table.add_column("Value", style="white")
+            table.add_row("Positive", f"{sentiment['positive']} ({sentiment['positive_ratio']}%)")
+            table.add_row("Negative", f"{sentiment['negative']} ({sentiment['negative_ratio']}%)")
+            table.add_row("Neutral", str(sentiment['neutral']))
+            console.print(table)
+
+            if output:
+                with open(output, "w", encoding="utf-8") as f:
+                    f.write(result["analysis"])
+                console.print(f"\n[green]Analysis saved to {output}[/green]")
+            else:
+                console.print(Panel(Markdown(result["analysis"]), title="AI Analysis", border_style="magenta"))
+
+        except Exception as e:
+            console.print(f"[red]Error: {e}[/red]")
+            raise SystemExit(1)
+
+
+@cli.command("cache")
+@click.option("--clear", is_flag=True, help="Clear all cache")
+@click.option("--clear-expired", is_flag=True, help="Clear only expired cache")
+@click.option("--stats", is_flag=True, help="Show cache statistics")
+def cache_cmd(clear, clear_expired, stats):
+    """Manage cache"""
+    from .cache import get_transcript_cache, get_analysis_cache
+
+    transcript_cache = get_transcript_cache()
+    analysis_cache = get_analysis_cache()
+
+    if clear:
+        t_count = transcript_cache.clear()
+        a_count = analysis_cache.clear()
+        console.print(f"[green]Cleared {t_count + a_count} cache files[/green]")
+
+    elif clear_expired:
+        t_count = transcript_cache.clear_expired()
+        a_count = analysis_cache.clear_expired()
+        console.print(f"[green]Cleared {t_count + a_count} expired cache files[/green]")
+
+    elif stats:
+        t_stats = transcript_cache.get_stats()
+        a_stats = analysis_cache.get_stats()
+
+        table = Table(title="Cache Statistics")
+        table.add_column("Cache", style="cyan")
+        table.add_column("Files", style="white")
+        table.add_column("Size", style="green")
+        table.add_column("Location", style="dim")
+
+        table.add_row(
+            "Transcripts",
+            f"{t_stats['valid_files']} ({t_stats['expired_files']} expired)",
+            f"{t_stats['total_size_mb']} MB",
+            t_stats['cache_dir'],
+        )
+        table.add_row(
+            "Analysis",
+            f"{a_stats['valid_files']} ({a_stats['expired_files']} expired)",
+            f"{a_stats['total_size_mb']} MB",
+            a_stats['cache_dir'],
+        )
+
+        console.print(table)
+
+    else:
+        console.print("[dim]Use --stats, --clear, or --clear-expired[/dim]")
 
 
 def main():
