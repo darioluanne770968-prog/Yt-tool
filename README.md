@@ -24,10 +24,22 @@ AI-powered YouTube video analysis toolkit - 智能 YouTube 视频分析工具
 | **Mind Map** | Generate mind maps | `yt-tool mindmap` |
 | **Subtitles Download** | Export SRT/VTT/TXT | `yt-tool subtitle` |
 | **Audio Download** | Download MP3/M4A/WAV | `yt-tool audio` |
+| **Video Download** | Download MP4 video | `yt-tool video` |
+| **Thumbnail** | Download video thumbnail | `yt-tool thumbnail` |
 | **Comments Analysis** | AI analyze comments | `yt-tool comments` |
 | **Batch Processing** | Process multiple videos | `yt-tool batch` |
 | **Cache Management** | Manage local cache | `yt-tool cache` |
 | **Export** | Markdown/JSON/Notion/Obsidian | `yt-tool analyze` |
+
+### Content Generation
+
+| Feature | Description | Command |
+|---------|-------------|---------|
+| **Flashcards** | Generate Anki-style flashcards | `yt-tool flashcards` |
+| **Blog Post** | Convert video to blog article | `yt-tool blog` |
+| **Vocabulary** | Extract terminology | `yt-tool vocabulary` |
+| **Podcast Script** | Generate podcast script | `yt-tool podcast` |
+| **Full Report** | Comprehensive analysis report | `yt-tool report` |
 
 ## Installation
 
@@ -112,36 +124,61 @@ yt-tool qa "VIDEO_URL"
 
 # Search keywords
 yt-tool search "VIDEO_URL" "keyword"
-yt-tool search "VIDEO_URL" "AI" -f markdown
 ```
 
-### Extended Commands
+### Download Commands
 
 ```bash
-# Generate mind map
-yt-tool mindmap "VIDEO_URL"
-yt-tool mindmap "VIDEO_URL" -f mermaid
-yt-tool mindmap "VIDEO_URL" -f json
-
-# Download subtitles
-yt-tool subtitle "VIDEO_URL" -f srt
-yt-tool subtitle "VIDEO_URL" -f vtt
-yt-tool subtitle "VIDEO_URL" -f txt
+# Download video
+yt-tool video "VIDEO_URL" -q 1080
+yt-tool video "VIDEO_URL" -q 720
 
 # Download audio
 yt-tool audio "VIDEO_URL" -f mp3 -q 320
 yt-tool audio "VIDEO_URL" -f m4a -q 256
 
+# Download thumbnail
+yt-tool thumbnail "VIDEO_URL"
+
+# Download subtitles
+yt-tool subtitle "VIDEO_URL" -f srt
+yt-tool subtitle "VIDEO_URL" -f vtt
+```
+
+### Content Generation
+
+```bash
+# Generate flashcards
+yt-tool flashcards "VIDEO_URL"
+yt-tool flashcards "VIDEO_URL" -f anki -o cards.txt
+
+# Generate blog post
+yt-tool blog "VIDEO_URL" -o article.md
+
+# Extract vocabulary
+yt-tool vocabulary "VIDEO_URL"
+
+# Generate podcast script
+yt-tool podcast "VIDEO_URL"
+
+# Generate comprehensive report (includes everything!)
+yt-tool report "VIDEO_URL"
+yt-tool report "VIDEO_URL" --no-flashcards --no-vocabulary
+```
+
+### Analysis Commands
+
+```bash
+# Generate mind map
+yt-tool mindmap "VIDEO_URL"
+yt-tool mindmap "VIDEO_URL" -f mermaid
+
 # Analyze comments
-yt-tool comments "VIDEO_URL"
-yt-tool comments "VIDEO_URL" -n 100 -o comments.md
+yt-tool comments "VIDEO_URL" -n 100
 
 # Full analysis (summary + keypoints + chapters)
 yt-tool analyze "VIDEO_URL"
-yt-tool analyze "VIDEO_URL" --all
-yt-tool analyze "VIDEO_URL" -f notion
-yt-tool analyze "VIDEO_URL" -f obsidian
-yt-tool analyze "VIDEO_URL" -f json
+yt-tool analyze "VIDEO_URL" --all -f notion
 
 # Batch processing
 yt-tool batch "URL1" "URL2" "URL3"
@@ -151,7 +188,6 @@ yt-tool batch -p "PLAYLIST_URL"
 # Cache management
 yt-tool cache --stats
 yt-tool cache --clear
-yt-tool cache --clear-expired
 ```
 
 ## Summary Styles
@@ -165,6 +201,34 @@ yt-tool cache --clear-expired
 | `academic` | 学术风格 | Academic/research style |
 | `casual` | 口语化 | Casual conversational |
 | `twitter` | 推文风格 | Social media ready |
+
+## All Commands
+
+| Command | Description |
+|---------|-------------|
+| `transcript` | Extract video transcript |
+| `summary` | Generate AI summary |
+| `keypoints` | Extract key points |
+| `chapters` | Generate chapter timestamps |
+| `translate` | Translate subtitles |
+| `qa` | Interactive Q&A |
+| `search` | Search in transcript |
+| `info` | Get video info |
+| `mindmap` | Generate mind map |
+| `subtitle` | Download subtitles (SRT/VTT) |
+| `audio` | Download audio (MP3/M4A) |
+| `video` | Download video (MP4) |
+| `thumbnail` | Download thumbnail |
+| `comments` | Analyze comments |
+| `flashcards` | Generate flashcards |
+| `blog` | Generate blog post |
+| `vocabulary` | Extract vocabulary |
+| `podcast` | Generate podcast script |
+| `report` | Generate full report |
+| `analyze` | Full video analysis |
+| `batch` | Batch process videos |
+| `cache` | Manage cache |
+| `styles` | List summary styles |
 
 ## Python API
 
@@ -180,6 +244,8 @@ from yt_tool.video_info import VideoInfo
 from yt_tool.comments import CommentsAnalyzer
 from yt_tool.subtitle import SubtitleExporter
 from yt_tool.downloader import Downloader
+from yt_tool.generator import ContentGenerator
+from yt_tool.report import ReportGenerator
 from yt_tool.exporter import Exporter
 
 # Get video info
@@ -196,51 +262,32 @@ transcript = extractor.get_plain_text()
 summarizer = Summarizer()
 summary = summarizer.summarize(transcript, language="中文", style="detailed")
 
-# Extract key points
-key_points = summarizer.extract_key_points(transcript)
+# Generate flashcards
+content_gen = ContentGenerator()
+cards = content_gen.generate_flashcards(transcript, language="中文")
+anki_format = content_gen.export_flashcards_anki(cards)
 
-# Generate chapters
-generator = TimestampGenerator()
-chapters = generator.generate(extractor.get_formatted())
+# Generate blog post
+blog_post = content_gen.generate_blog_post(transcript, language="中文")
 
-# Generate mind map
-mindmap_gen = MindmapGenerator()
-mindmap = mindmap_gen.generate(transcript)
-markdown = mindmap_gen.to_markdown(mindmap)
-mermaid = mindmap_gen.to_mermaid(mindmap)
+# Extract vocabulary
+vocabulary = content_gen.extract_vocabulary(transcript, language="中文")
 
-# Translate
-translator = Translator()
-translated = translator.translate(transcript, target_language="English")
-
-# Q&A
-qa = VideoQA(transcript)
-answer = qa.ask("What is this video about?")
-
-# Search
-searcher = TranscriptSearch(extractor.get_segments(), "VIDEO_ID")
-results = searcher.search("keyword")
-
-# Analyze comments
-analyzer = CommentsAnalyzer()
-result = analyzer.analyze_video("VIDEO_ID", max_comments=100)
-
-# Download subtitles
-subtitle_exporter = SubtitleExporter(extractor.get_segments(), "VIDEO_ID")
-subtitle_exporter.save("output", "srt")
-
-# Download audio
-downloader = Downloader("output")
-downloader.download_audio("VIDEO_ID", format="mp3", quality="320")
-
-# Export
-exporter = Exporter("output")
-exporter.export_markdown(
-    video_id="VIDEO_ID",
-    summary=summary,
-    key_points=key_points,
-    chapters=chapters
+# Generate comprehensive report
+report_gen = ReportGenerator(output_dir="output")
+result = report_gen.generate_full_report(
+    "VIDEO_ID",
+    language="中文",
+    include_flashcards=True,
+    include_mindmap=True,
 )
+print(result["report_path"])
+
+# Download video/audio
+downloader = Downloader("output")
+downloader.download_video("VIDEO_ID", quality="1080")
+downloader.download_audio("VIDEO_ID", format="mp3", quality="320")
+downloader.download_thumbnail("VIDEO_ID")
 ```
 
 ## Supported Languages
@@ -266,12 +313,13 @@ exporter.export_markdown(
 - **SRT** - SubRip subtitle format
 - **VTT** - WebVTT subtitle format
 - **Mermaid** - Mind map diagram
+- **Anki** - Flashcard import format
 
 ## Requirements
 
 - Python 3.9+
 - OpenAI API key or Anthropic API key
-- FFmpeg (for audio download)
+- FFmpeg (for audio/video download)
 
 ## License
 

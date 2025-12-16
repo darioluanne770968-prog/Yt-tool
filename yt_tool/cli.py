@@ -785,6 +785,298 @@ def cache_cmd(clear, clear_expired, stats):
         console.print("[dim]Use --stats, --clear, or --clear-expired[/dim]")
 
 
+@cli.command()
+@click.argument("url")
+@click.option("--quality", "-q", default="720", type=click.Choice(["360", "480", "720", "1080", "best"]))
+@click.option("--output-dir", "-d", default="output", help="Output directory")
+def video(url, quality, output_dir):
+    """Download video from YouTube"""
+    from .downloader import Downloader
+    from .extractor import extract_video_id
+
+    video_id = extract_video_id(url)
+    if not video_id:
+        console.print("[red]Invalid YouTube URL[/red]")
+        raise SystemExit(1)
+
+    console.print(f"[dim]Downloading video ({quality}p)...[/dim]")
+
+    try:
+        downloader = Downloader(output_dir)
+        filepath = downloader.download_video(video_id, quality)
+        console.print(f"[green]Video saved to: {filepath}[/green]")
+
+    except Exception as e:
+        console.print(f"[red]Error: {e}[/red]")
+        raise SystemExit(1)
+
+
+@cli.command()
+@click.argument("url")
+@click.option("--output-dir", "-d", default="output", help="Output directory")
+def thumbnail(url, output_dir):
+    """Download video thumbnail"""
+    from .downloader import Downloader
+    from .extractor import extract_video_id
+
+    video_id = extract_video_id(url)
+    if not video_id:
+        console.print("[red]Invalid YouTube URL[/red]")
+        raise SystemExit(1)
+
+    try:
+        downloader = Downloader(output_dir)
+        filepath = downloader.download_thumbnail(video_id)
+        console.print(f"[green]Thumbnail saved to: {filepath}[/green]")
+
+    except Exception as e:
+        console.print(f"[red]Error: {e}[/red]")
+        raise SystemExit(1)
+
+
+@cli.command()
+@click.argument("url")
+@click.option("--language", "-l", default="中文", help="Output language")
+@click.option("--format", "-f", "fmt", default="markdown", type=click.Choice(["markdown", "anki"]))
+@click.option("--output", "-o", help="Output file path")
+def flashcards(url, language, fmt, output):
+    """Generate flashcards from video content"""
+    from .extractor import TranscriptExtractor
+    from .generator import ContentGenerator
+    from .config import Config
+
+    valid, msg = Config.validate()
+    if not valid:
+        console.print(f"[red]{msg}[/red]")
+        raise SystemExit(1)
+
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        console=console,
+    ) as progress:
+        task = progress.add_task("Extracting transcript...", total=None)
+
+        try:
+            extractor = TranscriptExtractor(url)
+            extractor.extract()
+            transcript_text = extractor.get_plain_text()
+
+            progress.update(task, description="Generating flashcards...")
+
+            generator = ContentGenerator()
+            cards = generator.generate_flashcards(transcript_text, language)
+
+            if fmt == "anki":
+                result = generator.export_flashcards_anki(cards)
+            else:
+                result = generator.export_flashcards_markdown(cards)
+
+            if output:
+                with open(output, "w", encoding="utf-8") as f:
+                    f.write(result)
+                console.print(f"[green]Flashcards saved to {output}[/green]")
+            else:
+                console.print(Panel(Markdown(result), title=f"Flashcards ({len(cards)} cards)", border_style="yellow"))
+
+            console.print(f"\n[dim]Generated {len(cards)} flashcards[/dim]")
+
+        except Exception as e:
+            console.print(f"[red]Error: {e}[/red]")
+            raise SystemExit(1)
+
+
+@cli.command()
+@click.argument("url")
+@click.option("--language", "-l", default="中文", help="Output language")
+@click.option("--output", "-o", help="Output file path")
+def blog(url, language, output):
+    """Generate blog post from video content"""
+    from .extractor import TranscriptExtractor
+    from .generator import ContentGenerator
+    from .config import Config
+
+    valid, msg = Config.validate()
+    if not valid:
+        console.print(f"[red]{msg}[/red]")
+        raise SystemExit(1)
+
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        console=console,
+    ) as progress:
+        task = progress.add_task("Extracting transcript...", total=None)
+
+        try:
+            extractor = TranscriptExtractor(url)
+            extractor.extract()
+            transcript_text = extractor.get_plain_text()
+
+            progress.update(task, description="Generating blog post...")
+
+            generator = ContentGenerator()
+            result = generator.generate_blog_post(transcript_text, language)
+
+            if output:
+                with open(output, "w", encoding="utf-8") as f:
+                    f.write(result)
+                console.print(f"[green]Blog post saved to {output}[/green]")
+            else:
+                console.print(Panel(Markdown(result), title="Blog Post", border_style="blue"))
+
+        except Exception as e:
+            console.print(f"[red]Error: {e}[/red]")
+            raise SystemExit(1)
+
+
+@cli.command()
+@click.argument("url")
+@click.option("--language", "-l", default="中文", help="Output language")
+@click.option("--output", "-o", help="Output file path")
+def vocabulary(url, language, output):
+    """Extract vocabulary and terminology from video"""
+    from .extractor import TranscriptExtractor
+    from .generator import ContentGenerator
+    from .config import Config
+
+    valid, msg = Config.validate()
+    if not valid:
+        console.print(f"[red]{msg}[/red]")
+        raise SystemExit(1)
+
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        console=console,
+    ) as progress:
+        task = progress.add_task("Extracting transcript...", total=None)
+
+        try:
+            extractor = TranscriptExtractor(url)
+            extractor.extract()
+            transcript_text = extractor.get_plain_text()
+
+            progress.update(task, description="Extracting vocabulary...")
+
+            generator = ContentGenerator()
+            result = generator.extract_vocabulary(transcript_text, language)
+
+            if output:
+                with open(output, "w", encoding="utf-8") as f:
+                    f.write(result)
+                console.print(f"[green]Vocabulary saved to {output}[/green]")
+            else:
+                console.print(Panel(Markdown(result), title="Vocabulary & Terminology", border_style="green"))
+
+        except Exception as e:
+            console.print(f"[red]Error: {e}[/red]")
+            raise SystemExit(1)
+
+
+@cli.command()
+@click.argument("url")
+@click.option("--language", "-l", default="中文", help="Output language")
+@click.option("--output", "-o", help="Output file path")
+def podcast(url, language, output):
+    """Generate podcast script from video content"""
+    from .extractor import TranscriptExtractor
+    from .generator import ContentGenerator
+    from .config import Config
+
+    valid, msg = Config.validate()
+    if not valid:
+        console.print(f"[red]{msg}[/red]")
+        raise SystemExit(1)
+
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        console=console,
+    ) as progress:
+        task = progress.add_task("Extracting transcript...", total=None)
+
+        try:
+            extractor = TranscriptExtractor(url)
+            extractor.extract()
+            transcript_text = extractor.get_plain_text()
+
+            progress.update(task, description="Generating podcast script...")
+
+            generator = ContentGenerator()
+            result = generator.generate_podcast_script(transcript_text, language)
+
+            if output:
+                with open(output, "w", encoding="utf-8") as f:
+                    f.write(result)
+                console.print(f"[green]Podcast script saved to {output}[/green]")
+            else:
+                console.print(Panel(result, title="Podcast Script", border_style="magenta"))
+
+        except Exception as e:
+            console.print(f"[red]Error: {e}[/red]")
+            raise SystemExit(1)
+
+
+@cli.command()
+@click.argument("url")
+@click.option("--language", "-l", default="中文", help="Output language")
+@click.option("--output-dir", "-d", default="output", help="Output directory")
+@click.option("--no-transcript", is_flag=True, help="Exclude transcript from report")
+@click.option("--no-flashcards", is_flag=True, help="Exclude flashcards")
+@click.option("--no-mindmap", is_flag=True, help="Exclude mind map")
+@click.option("--no-vocabulary", is_flag=True, help="Exclude vocabulary")
+def report(url, language, output_dir, no_transcript, no_flashcards, no_mindmap, no_vocabulary):
+    """Generate comprehensive analysis report"""
+    from .report import ReportGenerator
+    from .config import Config
+
+    valid, msg = Config.validate()
+    if not valid:
+        console.print(f"[red]{msg}[/red]")
+        raise SystemExit(1)
+
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        console=console,
+    ) as progress:
+        task = progress.add_task("Starting...", total=None)
+
+        def progress_callback(step, total, description):
+            progress.update(task, description=f"[{step}/{total}] {description}")
+
+        try:
+            generator = ReportGenerator(output_dir=output_dir)
+            result = generator.generate_full_report(
+                url,
+                language=language,
+                include_transcript=not no_transcript,
+                include_flashcards=not no_flashcards,
+                include_mindmap=not no_mindmap,
+                include_vocabulary=not no_vocabulary,
+                progress_callback=progress_callback,
+            )
+
+            if result["success"]:
+                console.print(f"\n[green]Report generated successfully![/green]")
+                console.print(f"\n[bold]Generated files:[/bold]")
+                for f in result["files"]:
+                    console.print(f"  - {f}")
+
+                # Show summary preview
+                if result.get("summary"):
+                    preview = result["summary"][:500] + "..." if len(result["summary"]) > 500 else result["summary"]
+                    console.print(Panel(Markdown(preview), title="Summary Preview", border_style="green"))
+            else:
+                console.print(f"[red]Error: {result.get('error')}[/red]")
+                raise SystemExit(1)
+
+        except Exception as e:
+            console.print(f"[red]Error: {e}[/red]")
+            raise SystemExit(1)
+
+
 def main():
     """Main entry point"""
     cli()
