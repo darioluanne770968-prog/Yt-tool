@@ -14,3 +14,19 @@ rich>=13.7.0
 # Utilities
 python-dotenv>=1.0.0
 requests>=2.31.0
+
+# API Server (optional)
+flask>=3.0.0
+flask-cors>=4.0.0
+
+# Notion integration (optional)
+notion-client>=2.0.0
+
+# TTS (optional)
+edge-tts>=6.1.0
+gTTS>=2.4.0
+
+# Whisper transcription (optional)
+# openai-whisper>=20231117
+
+# Note: Some features require FFmpeg to be installed on your system

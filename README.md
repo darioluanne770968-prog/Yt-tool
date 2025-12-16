@@ -41,6 +41,55 @@ AI-powered YouTube video analysis toolkit - 智能 YouTube 视频分析工具
 | **Podcast Script** | Generate podcast script | `yt-tool podcast` |
 | **Full Report** | Comprehensive analysis report | `yt-tool report` |
 
+### Learning Enhancement (NEW!)
+
+| Feature | Description | Command |
+|---------|-------------|---------|
+| **Quiz Generator** | Create quizzes from video content | `yt-tool quiz` |
+| **Study Guide** | Generate comprehensive study guides | `yt-tool study-guide` |
+| **Concepts Explainer** | Extract and explain key concepts | `yt-tool concepts` |
+| **Learning Path** | Create learning paths from playlists | `yt-tool learning-path` |
+
+### Analysis & Research (NEW!)
+
+| Feature | Description | Command |
+|---------|-------------|---------|
+| **Code Extractor** | Extract code from programming tutorials | `yt-tool extract-code` |
+| **References** | Extract citations and resources | `yt-tool references` |
+| **Video Comparison** | Compare multiple videos | `yt-tool compare` |
+| **Channel Analysis** | Analyze YouTube channels | `yt-tool channel` |
+| **Sentiment Analysis** | Analyze tone and sentiment | `yt-tool sentiment` |
+| **Fact Checker** | Identify claims and verify facts | `yt-tool factcheck` |
+| **SEO Analysis** | Analyze video SEO | `yt-tool seo` |
+
+### Content Creation Suite (NEW!)
+
+| Feature | Description | Command |
+|---------|-------------|---------|
+| **Presentation** | Generate PPT/slides from video | `yt-tool presentation` |
+| **Social Media** | Create social media content | `yt-tool social` |
+| **Newsletter** | Generate email newsletters | `yt-tool newsletter` |
+
+### Tools & Utilities (NEW!)
+
+| Feature | Description | Command |
+|---------|-------------|---------|
+| **Whisper Transcription** | AI-powered transcription | `yt-tool whisper` |
+| **Clip Extraction** | Extract video clips | `yt-tool clip` |
+| **GIF Generator** | Create GIFs from videos | `yt-tool gif` |
+| **Text-to-Speech** | Convert text to audio | `yt-tool tts` |
+| **REST API Server** | Run as API service | `yt-tool api` |
+| **Notion Sync** | Sync notes to Notion | `yt-tool notion` |
+
+### Advanced Features (NEW!)
+
+| Feature | Description | Command |
+|---------|-------------|---------|
+| **Multi-Video Summary** | Summarize multiple videos | `yt-tool multi-summary` |
+| **Progress Tracking** | Track learning progress | `yt-tool progress` |
+| **Recommendations** | Get smart video recommendations | `yt-tool recommend` |
+| **Channel Monitor** | Monitor channels for new videos | `yt-tool monitor` |
+
 ## Installation
 
 ### 1. Clone the repository
@@ -85,6 +134,10 @@ GOOGLE_API_KEY=your_google_api_key_here
 
 # Set default provider: openai, anthropic, or gemini
 AI_PROVIDER=openai
+
+# Notion integration (optional)
+NOTION_API_KEY=your_notion_api_key_here
+NOTION_DATABASE_ID=your_database_id_here
 ```
 
 **Supported AI Providers:**
@@ -176,6 +229,134 @@ yt-tool report "VIDEO_URL"
 yt-tool report "VIDEO_URL" --no-flashcards --no-vocabulary
 ```
 
+### Learning Enhancement (NEW!)
+
+```bash
+# Generate quiz from video
+yt-tool quiz "VIDEO_URL"
+yt-tool quiz "VIDEO_URL" --questions 20 --type multiple-choice
+yt-tool quiz "VIDEO_URL" --type true-false -o quiz.md
+
+# Generate study guide
+yt-tool study-guide "VIDEO_URL"
+yt-tool study-guide "VIDEO_URL" --include-exercises -o study.md
+
+# Extract and explain concepts
+yt-tool concepts "VIDEO_URL"
+yt-tool concepts "VIDEO_URL" --glossary    # Create glossary
+yt-tool concepts "VIDEO_URL" --beginner    # Beginner-friendly explanations
+
+# Create learning path from playlist
+yt-tool learning-path "PLAYLIST_URL"
+yt-tool learning-path "VIDEO_URL" --schedule weekly
+```
+
+### Analysis & Research (NEW!)
+
+```bash
+# Extract code from programming tutorials
+yt-tool extract-code "VIDEO_URL"
+yt-tool extract-code "VIDEO_URL" --format python -o code.py
+
+# Extract references and resources
+yt-tool references "VIDEO_URL"
+yt-tool references "VIDEO_URL" --bibliography    # Academic format
+
+# Compare multiple videos
+yt-tool compare "VIDEO_URL_1" "VIDEO_URL_2"
+yt-tool compare "URL1" "URL2" "URL3" --aspects "depth,accuracy,clarity"
+
+# Analyze YouTube channel
+yt-tool channel "CHANNEL_URL"
+yt-tool channel "CHANNEL_URL" --topics    # Analyze channel topics
+
+# Sentiment analysis
+yt-tool sentiment "VIDEO_URL"
+yt-tool sentiment "VIDEO_URL" --bias-check
+
+# Fact checking
+yt-tool factcheck "VIDEO_URL"
+yt-tool factcheck "VIDEO_URL" --claims-only
+
+# SEO analysis
+yt-tool seo "VIDEO_URL"
+yt-tool seo "VIDEO_URL" --suggestions
+```
+
+### Content Creation Suite (NEW!)
+
+```bash
+# Generate presentation slides
+yt-tool presentation "VIDEO_URL"
+yt-tool presentation "VIDEO_URL" --format marp -o slides.md
+yt-tool presentation "VIDEO_URL" --format reveal -o slides.html
+
+# Generate social media content
+yt-tool social "VIDEO_URL"
+yt-tool social "VIDEO_URL" --platform twitter
+yt-tool social "VIDEO_URL" --platform linkedin
+yt-tool social "VIDEO_URL" --platform xiaohongshu
+
+# Generate newsletter
+yt-tool newsletter "VIDEO_URL"
+yt-tool newsletter "VIDEO_URL" --format html -o newsletter.html
+```
+
+### Tools & Utilities (NEW!)
+
+```bash
+# Whisper transcription (for videos without subtitles)
+yt-tool whisper "VIDEO_URL"
+yt-tool whisper "VIDEO_URL" --api    # Use OpenAI Whisper API
+
+# Extract video clips
+yt-tool clip "VIDEO_URL" --start 00:01:30 --end 00:02:00
+yt-tool clip "VIDEO_URL" --highlights    # Auto-extract highlights
+
+# Create GIFs
+yt-tool gif "VIDEO_URL" --start 00:01:30 --duration 5
+yt-tool gif "VIDEO_URL" --thumbnail    # Create thumbnail GIF
+
+# Text-to-speech
+yt-tool tts "VIDEO_URL"    # Generate audio from summary
+yt-tool tts "VIDEO_URL" --voice alloy    # OpenAI voice
+yt-tool tts "VIDEO_URL" --engine edge    # Edge TTS (free)
+
+# Start REST API server
+yt-tool api
+yt-tool api --port 8080 --debug
+
+# Sync to Notion
+yt-tool notion "VIDEO_URL"
+yt-tool notion "VIDEO_URL" --database "My Videos"
+```
+
+### Advanced Features (NEW!)
+
+```bash
+# Multi-video summary
+yt-tool multi-summary "URL1" "URL2" "URL3"
+yt-tool multi-summary "URL1" "URL2" --deep-dive "topic"
+yt-tool multi-summary "URL1" "URL2" --synthesis    # Learning synthesis
+
+# Progress tracking
+yt-tool progress                     # Show progress stats
+yt-tool progress add "VIDEO_URL"     # Add video to tracking
+yt-tool progress complete "VIDEO_URL"    # Mark as completed
+yt-tool progress export              # Export progress report
+
+# Get recommendations
+yt-tool recommend "VIDEO_URL"        # Recommend based on video
+yt-tool recommend --history          # Recommend from watch history
+yt-tool recommend --topic "Python"   # Recommend for topic
+yt-tool recommend --path "Machine Learning"    # Create learning path
+
+# Channel monitoring
+yt-tool monitor add "CHANNEL_URL"    # Add channel to monitor
+yt-tool monitor check                # Check for new videos
+yt-tool monitor digest               # Generate digest of new content
+```
+
 ### Analysis Commands
 
 ```bash
@@ -214,6 +395,7 @@ yt-tool cache --clear
 
 ## All Commands
 
+### Core Commands
 | Command | Description |
 |---------|-------------|
 | `transcript` | Extract video transcript |
@@ -224,21 +406,108 @@ yt-tool cache --clear
 | `qa` | Interactive Q&A |
 | `search` | Search in transcript |
 | `info` | Get video info |
-| `mindmap` | Generate mind map |
+
+### Download Commands
+| Command | Description |
+|---------|-------------|
 | `subtitle` | Download subtitles (SRT/VTT) |
 | `audio` | Download audio (MP3/M4A) |
 | `video` | Download video (MP4) |
 | `thumbnail` | Download thumbnail |
-| `comments` | Analyze comments |
+
+### Content Generation
+| Command | Description |
+|---------|-------------|
 | `flashcards` | Generate flashcards |
 | `blog` | Generate blog post |
 | `vocabulary` | Extract vocabulary |
 | `podcast` | Generate podcast script |
 | `report` | Generate full report |
+| `mindmap` | Generate mind map |
+
+### Learning Enhancement
+| Command | Description |
+|---------|-------------|
+| `quiz` | Generate quiz questions |
+| `study-guide` | Generate study guide |
+| `concepts` | Extract and explain concepts |
+| `learning-path` | Create learning path |
+
+### Analysis & Research
+| Command | Description |
+|---------|-------------|
+| `extract-code` | Extract code from tutorials |
+| `references` | Extract citations/resources |
+| `compare` | Compare multiple videos |
+| `channel` | Analyze YouTube channel |
+| `sentiment` | Sentiment analysis |
+| `factcheck` | Fact checking |
+| `seo` | SEO analysis |
+| `comments` | Analyze comments |
+
+### Content Creation
+| Command | Description |
+|---------|-------------|
+| `presentation` | Generate slides |
+| `social` | Social media content |
+| `newsletter` | Email newsletter |
+
+### Tools & Utilities
+| Command | Description |
+|---------|-------------|
+| `whisper` | Whisper transcription |
+| `clip` | Extract video clips |
+| `gif` | Create GIFs |
+| `tts` | Text-to-speech |
+| `api` | Start REST API server |
+| `notion` | Sync to Notion |
+
+### Advanced Features
+| Command | Description |
+|---------|-------------|
+| `multi-summary` | Multi-video summary |
+| `progress` | Track learning progress |
+| `recommend` | Get recommendations |
+| `monitor` | Monitor channels |
+
+### Utility Commands
+| Command | Description |
+|---------|-------------|
 | `analyze` | Full video analysis |
 | `batch` | Batch process videos |
 | `cache` | Manage cache |
 | `styles` | List summary styles |
+
+## REST API
+
+Start the API server:
+
+```bash
+yt-tool api --port 5000
+```
+
+### API Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/transcript` | POST | Extract transcript |
+| `/api/summary` | POST | Generate summary |
+| `/api/keypoints` | POST | Extract key points |
+| `/api/chapters` | POST | Generate chapters |
+| `/api/translate` | POST | Translate content |
+| `/api/qa` | POST | Ask questions |
+| `/api/info` | POST | Get video info |
+| `/api/quiz` | POST | Generate quiz |
+| `/api/flashcards` | POST | Generate flashcards |
+| `/api/study-guide` | POST | Generate study guide |
+
+### API Example
+
+```bash
+curl -X POST http://localhost:5000/api/summary \
+  -H "Content-Type: application/json" \
+  -d '{"url": "VIDEO_URL", "language": "中文", "style": "detailed"}'
+```
 
 ## Python API
 
@@ -258,6 +527,31 @@ from yt_tool.generator import ContentGenerator
 from yt_tool.report import ReportGenerator
 from yt_tool.exporter import Exporter
 
+# New modules
+from yt_tool.quiz import QuizGenerator
+from yt_tool.study_guide import StudyGuideGenerator
+from yt_tool.code_extractor import CodeExtractor
+from yt_tool.references import ReferenceExtractor
+from yt_tool.concepts import ConceptExplainer
+from yt_tool.compare import VideoComparator
+from yt_tool.channel import ChannelAnalyzer
+from yt_tool.sentiment import SentimentAnalyzer
+from yt_tool.factcheck import FactChecker
+from yt_tool.learning_path import LearningPathGenerator
+from yt_tool.presentation import PresentationGenerator
+from yt_tool.social import SocialMediaGenerator
+from yt_tool.newsletter import NewsletterGenerator
+from yt_tool.seo import SEOAnalyzer
+from yt_tool.whisper_transcribe import WhisperTranscriber
+from yt_tool.clip import ClipExtractor
+from yt_tool.gif import GifGenerator
+from yt_tool.tts import TTSGenerator
+from yt_tool.notion_sync import NotionSync
+from yt_tool.multi_summary import MultiVideoSummarizer
+from yt_tool.progress import ProgressTracker
+from yt_tool.recommend import VideoRecommender
+from yt_tool.monitor import ChannelMonitor
+
 # Get video info
 video = VideoInfo("VIDEO_ID")
 video.fetch()
@@ -272,16 +566,45 @@ transcript = extractor.get_plain_text()
 summarizer = Summarizer()
 summary = summarizer.summarize(transcript, language="中文", style="detailed")
 
-# Generate flashcards
-content_gen = ContentGenerator()
-cards = content_gen.generate_flashcards(transcript, language="中文")
-anki_format = content_gen.export_flashcards_anki(cards)
+# Generate quiz
+quiz_gen = QuizGenerator()
+quiz = quiz_gen.generate_quiz(transcript, num_questions=10, language="中文")
 
-# Generate blog post
-blog_post = content_gen.generate_blog_post(transcript, language="中文")
+# Generate study guide
+study_gen = StudyGuideGenerator()
+guide = study_gen.generate_study_guide(transcript, language="中文")
 
-# Extract vocabulary
-vocabulary = content_gen.extract_vocabulary(transcript, language="中文")
+# Extract concepts
+concept_exp = ConceptExplainer()
+concepts = concept_exp.extract_concepts(transcript, language="中文")
+glossary = concept_exp.create_glossary(transcript, language="中文")
+
+# Generate presentation
+pres_gen = PresentationGenerator()
+slides = pres_gen.generate_marp_slides(transcript, language="中文")
+
+# Generate social media content
+social_gen = SocialMediaGenerator()
+twitter = social_gen.generate_twitter_thread(transcript, language="中文")
+linkedin = social_gen.generate_linkedin_post(transcript, language="中文")
+
+# Track progress
+tracker = ProgressTracker()
+tracker.add_video("VIDEO_ID", title="Video Title", status="watching")
+tracker.update_progress("VIDEO_ID", 50)
+stats = tracker.get_stats()
+
+# Get recommendations
+recommender = VideoRecommender()
+recommendations = recommender.recommend_next(transcript, language="中文")
+
+# Multi-video summary
+multi_sum = MultiVideoSummarizer()
+synthesis = multi_sum.summarize_multiple(["URL1", "URL2"], language="中文")
+
+# Text-to-speech
+tts = TTSGenerator()
+tts.generate_audio(summary, output_path="summary.mp3")
 
 # Generate comprehensive report
 report_gen = ReportGenerator(output_dir="output")
@@ -324,6 +647,9 @@ downloader.download_thumbnail("VIDEO_ID")
 - **VTT** - WebVTT subtitle format
 - **Mermaid** - Mind map diagram
 - **Anki** - Flashcard import format
+- **HTML** - Web pages (newsletters, presentations)
+- **Marp** - Markdown presentation slides
+- **Reveal.js** - HTML presentation slides
 
 ## Requirements
 
@@ -332,7 +658,17 @@ downloader.download_thumbnail("VIDEO_ID")
   - OpenAI API key
   - Anthropic API key
   - Google API key (for Gemini)
-- FFmpeg (for audio/video download)
+- FFmpeg (for audio/video download, clip extraction, GIF creation)
+
+### Optional Dependencies
+
+| Feature | Dependency |
+|---------|------------|
+| REST API | Flask, Flask-CORS |
+| Notion Sync | notion-client |
+| Text-to-Speech | edge-tts, gTTS |
+| Whisper | openai-whisper |
+| Video Clips/GIFs | FFmpeg |
 
 ## License
 

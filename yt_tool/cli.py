@@ -1077,6 +1077,766 @@ def report(url, language, output_dir, no_transcript, no_flashcards, no_mindmap, 
             raise SystemExit(1)
 
 
+# ============================================
+# New Feature Commands
+# ============================================
+
+@cli.command()
+@click.argument("url")
+@click.option("--num", "-n", default=10, help="Number of questions")
+@click.option("--difficulty", "-d", default="medium", type=click.Choice(["easy", "medium", "hard"]))
+@click.option("--language", "-l", default="中文", help="Output language")
+@click.option("--output", "-o", help="Output file path")
+def quiz(url, num, difficulty, language, output):
+    """Generate quiz from video content"""
+    from .extractor import TranscriptExtractor
+    from .quiz import QuizGenerator
+    from .config import Config
+
+    valid, msg = Config.validate()
+    if not valid:
+        console.print(f"[red]{msg}[/red]")
+        raise SystemExit(1)
+
+    with Progress(SpinnerColumn(), TextColumn("[progress.description]{task.description}"), console=console) as progress:
+        task = progress.add_task("Extracting transcript...", total=None)
+        try:
+            extractor = TranscriptExtractor(url)
+            extractor.extract()
+            transcript = extractor.get_plain_text()
+            progress.update(task, description="Generating quiz...")
+            generator = QuizGenerator()
+            result = generator.generate_quiz(transcript, num, difficulty=difficulty, language=language)
+            if output:
+                with open(output, "w", encoding="utf-8") as f:
+                    f.write(result["quiz"])
+                console.print(f"[green]Quiz saved to {output}[/green]")
+            else:
+                console.print(Panel(Markdown(result["quiz"]), title=f"Quiz ({num} questions)", border_style="yellow"))
+        except Exception as e:
+            console.print(f"[red]Error: {e}[/red]")
+            raise SystemExit(1)
+
+
+@cli.command("study-guide")
+@click.argument("url")
+@click.option("--language", "-l", default="中文", help="Output language")
+@click.option("--output", "-o", help="Output file path")
+def study_guide(url, language, output):
+    """Generate study guide from video"""
+    from .extractor import TranscriptExtractor
+    from .study_guide import StudyGuideGenerator
+    from .config import Config
+
+    valid, msg = Config.validate()
+    if not valid:
+        console.print(f"[red]{msg}[/red]")
+        raise SystemExit(1)
+
+    with Progress(SpinnerColumn(), TextColumn("[progress.description]{task.description}"), console=console) as progress:
+        task = progress.add_task("Extracting transcript...", total=None)
+        try:
+            extractor = TranscriptExtractor(url)
+            extractor.extract()
+            transcript = extractor.get_plain_text()
+            progress.update(task, description="Generating study guide...")
+            generator = StudyGuideGenerator()
+            result = generator.generate_study_guide(transcript, language=language)
+            if output:
+                with open(output, "w", encoding="utf-8") as f:
+                    f.write(result)
+                console.print(f"[green]Study guide saved to {output}[/green]")
+            else:
+                console.print(Panel(Markdown(result), title="Study Guide", border_style="green"))
+        except Exception as e:
+            console.print(f"[red]Error: {e}[/red]")
+            raise SystemExit(1)
+
+
+@cli.command("extract-code")
+@click.argument("url")
+@click.option("--language", "-l", default="中文", help="Output language")
+@click.option("--output-dir", "-d", default="output", help="Output directory")
+def extract_code(url, language, output_dir):
+    """Extract code snippets from programming tutorial"""
+    from .extractor import TranscriptExtractor
+    from .code_extractor import CodeExtractor
+    from .config import Config
+
+    valid, msg = Config.validate()
+    if not valid:
+        console.print(f"[red]{msg}[/red]")
+        raise SystemExit(1)
+
+    with Progress(SpinnerColumn(), TextColumn("[progress.description]{task.description}"), console=console) as progress:
+        task = progress.add_task("Extracting transcript...", total=None)
+        try:
+            extractor = TranscriptExtractor(url)
+            extractor.extract()
+            transcript = extractor.get_plain_text()
+            progress.update(task, description="Extracting code...")
+            code_extractor = CodeExtractor()
+            result = code_extractor.extract_code(transcript, output_language=language)
+            console.print(Panel(Markdown(result["full_response"]), title="Extracted Code", border_style="cyan"))
+            console.print(f"\n[dim]Found {len(result['code_blocks'])} code blocks[/dim]")
+        except Exception as e:
+            console.print(f"[red]Error: {e}[/red]")
+            raise SystemExit(1)
+
+
+@cli.command()
+@click.argument("url")
+@click.option("--language", "-l", default="中文", help="Output language")
+@click.option("--output", "-o", help="Output file path")
+def references(url, language, output):
+    """Extract references and citations from video"""
+    from .extractor import TranscriptExtractor
+    from .references import ReferenceExtractor
+    from .config import Config
+
+    valid, msg = Config.validate()
+    if not valid:
+        console.print(f"[red]{msg}[/red]")
+        raise SystemExit(1)
+
+    with Progress(SpinnerColumn(), TextColumn("[progress.description]{task.description}"), console=console) as progress:
+        task = progress.add_task("Extracting transcript...", total=None)
+        try:
+            extractor = TranscriptExtractor(url)
+            extractor.extract()
+            transcript = extractor.get_plain_text()
+            progress.update(task, description="Extracting references...")
+            ref_extractor = ReferenceExtractor()
+            result = ref_extractor.extract_references(transcript, language)
+            if output:
+                with open(output, "w", encoding="utf-8") as f:
+                    f.write(result["references"])
+                console.print(f"[green]References saved to {output}[/green]")
+            else:
+                console.print(Panel(Markdown(result["references"]), title="References", border_style="blue"))
+        except Exception as e:
+            console.print(f"[red]Error: {e}[/red]")
+            raise SystemExit(1)
+
+
+@cli.command()
+@click.argument("url")
+@click.option("--language", "-l", default="中文", help="Output language")
+@click.option("--output", "-o", help="Output file path")
+def concepts(url, language, output):
+    """Extract and explain key concepts"""
+    from .extractor import TranscriptExtractor
+    from .concepts import ConceptExplainer
+    from .config import Config
+
+    valid, msg = Config.validate()
+    if not valid:
+        console.print(f"[red]{msg}[/red]")
+        raise SystemExit(1)
+
+    with Progress(SpinnerColumn(), TextColumn("[progress.description]{task.description}"), console=console) as progress:
+        task = progress.add_task("Extracting transcript...", total=None)
+        try:
+            extractor = TranscriptExtractor(url)
+            extractor.extract()
+            transcript = extractor.get_plain_text()
+            progress.update(task, description="Extracting concepts...")
+            explainer = ConceptExplainer()
+            result = explainer.extract_concepts(transcript, language)
+            if output:
+                with open(output, "w", encoding="utf-8") as f:
+                    f.write(result)
+                console.print(f"[green]Concepts saved to {output}[/green]")
+            else:
+                console.print(Panel(Markdown(result), title="Key Concepts", border_style="magenta"))
+        except Exception as e:
+            console.print(f"[red]Error: {e}[/red]")
+            raise SystemExit(1)
+
+
+@cli.command()
+@click.argument("urls", nargs=-1, required=True)
+@click.option("--language", "-l", default="中文", help="Output language")
+@click.option("--output", "-o", help="Output file path")
+def compare(urls, language, output):
+    """Compare multiple videos"""
+    from .compare import VideoComparator
+    from .config import Config
+
+    valid, msg = Config.validate()
+    if not valid:
+        console.print(f"[red]{msg}[/red]")
+        raise SystemExit(1)
+
+    console.print(f"[dim]Comparing {len(urls)} videos...[/dim]")
+    try:
+        comparator = VideoComparator()
+        result = comparator.compare_by_urls(list(urls), language)
+        if output:
+            with open(output, "w", encoding="utf-8") as f:
+                f.write(result)
+            console.print(f"[green]Comparison saved to {output}[/green]")
+        else:
+            console.print(Panel(Markdown(result), title="Video Comparison", border_style="cyan"))
+    except Exception as e:
+        console.print(f"[red]Error: {e}[/red]")
+        raise SystemExit(1)
+
+
+@cli.command("channel")
+@click.argument("channel_url")
+@click.option("--language", "-l", default="中文", help="Output language")
+@click.option("--output", "-o", help="Output file path")
+def analyze_channel(channel_url, language, output):
+    """Analyze YouTube channel"""
+    from .channel import ChannelAnalyzer
+    from .config import Config
+
+    valid, msg = Config.validate()
+    if not valid:
+        console.print(f"[red]{msg}[/red]")
+        raise SystemExit(1)
+
+    console.print("[dim]Analyzing channel...[/dim]")
+    try:
+        analyzer = ChannelAnalyzer()
+        result = analyzer.analyze_channel(channel_url, language)
+        if output:
+            with open(output, "w", encoding="utf-8") as f:
+                f.write(result)
+            console.print(f"[green]Analysis saved to {output}[/green]")
+        else:
+            console.print(Panel(Markdown(result), title="Channel Analysis", border_style="blue"))
+    except Exception as e:
+        console.print(f"[red]Error: {e}[/red]")
+        raise SystemExit(1)
+
+
+@cli.command()
+@click.argument("url")
+@click.option("--language", "-l", default="中文", help="Output language")
+@click.option("--output", "-o", help="Output file path")
+def sentiment(url, language, output):
+    """Analyze video sentiment and tone"""
+    from .extractor import TranscriptExtractor
+    from .sentiment import SentimentAnalyzer
+    from .config import Config
+
+    valid, msg = Config.validate()
+    if not valid:
+        console.print(f"[red]{msg}[/red]")
+        raise SystemExit(1)
+
+    with Progress(SpinnerColumn(), TextColumn("[progress.description]{task.description}"), console=console) as progress:
+        task = progress.add_task("Extracting transcript...", total=None)
+        try:
+            extractor = TranscriptExtractor(url)
+            extractor.extract()
+            transcript = extractor.get_plain_text()
+            progress.update(task, description="Analyzing sentiment...")
+            analyzer = SentimentAnalyzer()
+            result = analyzer.analyze_sentiment(transcript, language)
+            if output:
+                with open(output, "w", encoding="utf-8") as f:
+                    f.write(result["analysis"])
+                console.print(f"[green]Analysis saved to {output}[/green]")
+            else:
+                console.print(Panel(Markdown(result["analysis"]), title="Sentiment Analysis", border_style="yellow"))
+        except Exception as e:
+            console.print(f"[red]Error: {e}[/red]")
+            raise SystemExit(1)
+
+
+@cli.command()
+@click.argument("url")
+@click.option("--language", "-l", default="中文", help="Output language")
+@click.option("--output", "-o", help="Output file path")
+def factcheck(url, language, output):
+    """Fact-check video claims"""
+    from .extractor import TranscriptExtractor
+    from .factcheck import FactChecker
+    from .config import Config
+
+    valid, msg = Config.validate()
+    if not valid:
+        console.print(f"[red]{msg}[/red]")
+        raise SystemExit(1)
+
+    with Progress(SpinnerColumn(), TextColumn("[progress.description]{task.description}"), console=console) as progress:
+        task = progress.add_task("Extracting transcript...", total=None)
+        try:
+            extractor = TranscriptExtractor(url)
+            extractor.extract()
+            transcript = extractor.get_plain_text()
+            progress.update(task, description="Fact-checking...")
+            checker = FactChecker()
+            result = checker.check_facts(transcript, language)
+            if output:
+                with open(output, "w", encoding="utf-8") as f:
+                    f.write(result["report"])
+                console.print(f"[green]Report saved to {output}[/green]")
+            else:
+                console.print(Panel(Markdown(result["report"]), title="Fact Check Report", border_style="red"))
+                console.print(f"\n[dim]{result['disclaimer']}[/dim]")
+        except Exception as e:
+            console.print(f"[red]Error: {e}[/red]")
+            raise SystemExit(1)
+
+
+@cli.command("learning-path")
+@click.argument("playlist_url")
+@click.option("--language", "-l", default="中文", help="Output language")
+@click.option("--level", default="beginner", type=click.Choice(["beginner", "intermediate", "advanced"]))
+@click.option("--output", "-o", help="Output file path")
+def learning_path(playlist_url, language, level, output):
+    """Generate learning path from playlist"""
+    from .learning_path import LearningPathGenerator
+    from .config import Config
+
+    valid, msg = Config.validate()
+    if not valid:
+        console.print(f"[red]{msg}[/red]")
+        raise SystemExit(1)
+
+    console.print("[dim]Analyzing playlist...[/dim]")
+    try:
+        generator = LearningPathGenerator()
+        result = generator.generate_learning_path(playlist_url, language, level)
+        if output:
+            with open(output, "w", encoding="utf-8") as f:
+                f.write(result)
+            console.print(f"[green]Learning path saved to {output}[/green]")
+        else:
+            console.print(Panel(Markdown(result), title="Learning Path", border_style="green"))
+    except Exception as e:
+        console.print(f"[red]Error: {e}[/red]")
+        raise SystemExit(1)
+
+
+@cli.command()
+@click.argument("url")
+@click.option("--slides", "-n", default=10, help="Number of slides")
+@click.option("--language", "-l", default="中文", help="Output language")
+@click.option("--format", "-f", "fmt", default="markdown", type=click.Choice(["markdown", "marp", "reveal"]))
+@click.option("--output", "-o", help="Output file path")
+def presentation(url, slides, language, fmt, output):
+    """Generate presentation slides from video"""
+    from .extractor import TranscriptExtractor
+    from .presentation import PresentationGenerator
+    from .config import Config
+
+    valid, msg = Config.validate()
+    if not valid:
+        console.print(f"[red]{msg}[/red]")
+        raise SystemExit(1)
+
+    with Progress(SpinnerColumn(), TextColumn("[progress.description]{task.description}"), console=console) as progress:
+        task = progress.add_task("Extracting transcript...", total=None)
+        try:
+            extractor = TranscriptExtractor(url)
+            extractor.extract()
+            transcript = extractor.get_plain_text()
+            progress.update(task, description="Generating presentation...")
+            generator = PresentationGenerator()
+            if fmt == "marp":
+                result = generator.generate_marp_slides(transcript, language=language)
+            elif fmt == "reveal":
+                result = generator.generate_reveal_js(transcript, language=language)
+            else:
+                result = generator.generate_slides(transcript, num_slides=slides, language=language)
+            if output:
+                with open(output, "w", encoding="utf-8") as f:
+                    f.write(result)
+                console.print(f"[green]Presentation saved to {output}[/green]")
+            else:
+                console.print(Panel(Markdown(result), title=f"Presentation ({slides} slides)", border_style="cyan"))
+        except Exception as e:
+            console.print(f"[red]Error: {e}[/red]")
+            raise SystemExit(1)
+
+
+@cli.command()
+@click.argument("url")
+@click.option("--platform", "-p", default="all", type=click.Choice(["all", "twitter", "linkedin", "xiaohongshu", "douyin"]))
+@click.option("--language", "-l", default="中文", help="Output language")
+@click.option("--output", "-o", help="Output file path")
+def social(url, platform, language, output):
+    """Generate social media content"""
+    from .extractor import TranscriptExtractor
+    from .social import SocialMediaGenerator
+    from .config import Config
+
+    valid, msg = Config.validate()
+    if not valid:
+        console.print(f"[red]{msg}[/red]")
+        raise SystemExit(1)
+
+    with Progress(SpinnerColumn(), TextColumn("[progress.description]{task.description}"), console=console) as progress:
+        task = progress.add_task("Extracting transcript...", total=None)
+        try:
+            extractor = TranscriptExtractor(url)
+            extractor.extract()
+            transcript = extractor.get_plain_text()
+            progress.update(task, description="Generating content...")
+            generator = SocialMediaGenerator()
+            if platform == "twitter":
+                result = generator.generate_twitter(transcript, language)
+            elif platform == "linkedin":
+                result = generator.generate_linkedin(transcript, language)
+            elif platform == "xiaohongshu":
+                result = generator.generate_xiaohongshu(transcript, language)
+            elif platform == "douyin":
+                result = generator.generate_douyin(transcript, language)
+            else:
+                result = generator.generate_all(transcript, language=language)["all_platforms"]
+            if output:
+                with open(output, "w", encoding="utf-8") as f:
+                    f.write(result)
+                console.print(f"[green]Content saved to {output}[/green]")
+            else:
+                console.print(Panel(Markdown(result), title=f"Social Media ({platform})", border_style="magenta"))
+        except Exception as e:
+            console.print(f"[red]Error: {e}[/red]")
+            raise SystemExit(1)
+
+
+@cli.command()
+@click.argument("url")
+@click.option("--language", "-l", default="中文", help="Output language")
+@click.option("--output", "-o", help="Output file path")
+def newsletter(url, language, output):
+    """Generate email newsletter from video"""
+    from .extractor import TranscriptExtractor
+    from .newsletter import NewsletterGenerator
+    from .config import Config
+
+    valid, msg = Config.validate()
+    if not valid:
+        console.print(f"[red]{msg}[/red]")
+        raise SystemExit(1)
+
+    with Progress(SpinnerColumn(), TextColumn("[progress.description]{task.description}"), console=console) as progress:
+        task = progress.add_task("Extracting transcript...", total=None)
+        try:
+            extractor = TranscriptExtractor(url)
+            extractor.extract()
+            transcript = extractor.get_plain_text()
+            progress.update(task, description="Generating newsletter...")
+            generator = NewsletterGenerator()
+            result = generator.generate_newsletter(transcript, language=language)
+            if output:
+                with open(output, "w", encoding="utf-8") as f:
+                    f.write(result)
+                console.print(f"[green]Newsletter saved to {output}[/green]")
+            else:
+                console.print(Panel(Markdown(result), title="Newsletter", border_style="blue"))
+        except Exception as e:
+            console.print(f"[red]Error: {e}[/red]")
+            raise SystemExit(1)
+
+
+@cli.command()
+@click.argument("url")
+@click.option("--language", "-l", default="中文", help="Output language")
+@click.option("--output", "-o", help="Output file path")
+def seo(url, language, output):
+    """Analyze and optimize video SEO"""
+    from .video_info import VideoInfo
+    from .extractor import TranscriptExtractor
+    from .seo import SEOAnalyzer
+    from .config import Config
+
+    valid, msg = Config.validate()
+    if not valid:
+        console.print(f"[red]{msg}[/red]")
+        raise SystemExit(1)
+
+    console.print("[dim]Analyzing SEO...[/dim]")
+    try:
+        video = VideoInfo(url)
+        video.fetch()
+        extractor = TranscriptExtractor(url)
+        extractor.extract()
+        transcript = extractor.get_plain_text()
+        analyzer = SEOAnalyzer()
+        result = analyzer.analyze_seo(
+            video.title, video.description or "", video.tags or [], transcript, language
+        )
+        if output:
+            with open(output, "w", encoding="utf-8") as f:
+                f.write(result["report"])
+            console.print(f"[green]SEO analysis saved to {output}[/green]")
+        else:
+            console.print(Panel(Markdown(result["report"]), title="SEO Analysis", border_style="yellow"))
+    except Exception as e:
+        console.print(f"[red]Error: {e}[/red]")
+        raise SystemExit(1)
+
+
+@cli.command()
+@click.argument("url")
+@click.option("--model", "-m", default="base", type=click.Choice(["tiny", "base", "small", "medium", "large"]))
+@click.option("--output-dir", "-d", default="output", help="Output directory")
+def whisper(url, model, output_dir):
+    """Transcribe video using Whisper AI"""
+    from .whisper_transcribe import WhisperTranscriber
+
+    console.print(f"[dim]Transcribing with Whisper ({model} model)...[/dim]")
+    console.print("[yellow]This may take several minutes...[/yellow]")
+    try:
+        transcriber = WhisperTranscriber(model)
+        result = transcriber.transcribe(url, output_dir=output_dir)
+        if result.get("success"):
+            console.print(f"[green]Transcription complete![/green]")
+            for fmt, path in result.get("files", {}).items():
+                console.print(f"  - {fmt}: {path}")
+        else:
+            console.print(f"[red]Error: {result.get('error')}[/red]")
+    except Exception as e:
+        console.print(f"[red]Error: {e}[/red]")
+        raise SystemExit(1)
+
+
+@cli.command()
+@click.argument("url")
+@click.argument("start_time")
+@click.argument("end_time")
+@click.option("--output-dir", "-d", default="output", help="Output directory")
+@click.option("--name", "-n", help="Output filename")
+def clip(url, start_time, end_time, output_dir, name):
+    """Extract video clip between timestamps"""
+    from .clip import ClipExtractor
+
+    console.print(f"[dim]Extracting clip {start_time} - {end_time}...[/dim]")
+    try:
+        extractor = ClipExtractor(output_dir)
+        result = extractor.extract_clip(url, start_time, end_time, name)
+        if result.get("success"):
+            console.print(f"[green]Clip saved to: {result['output_path']}[/green]")
+        else:
+            console.print(f"[red]Error: {result.get('error')}[/red]")
+    except Exception as e:
+        console.print(f"[red]Error: {e}[/red]")
+        raise SystemExit(1)
+
+
+@cli.command()
+@click.argument("url")
+@click.argument("start_time")
+@click.option("--duration", "-t", default=5.0, help="GIF duration in seconds")
+@click.option("--width", "-w", default=480, help="GIF width")
+@click.option("--output-dir", "-d", default="output", help="Output directory")
+def gif(url, start_time, duration, width, output_dir):
+    """Create GIF from video"""
+    from .gif import GifGenerator
+
+    console.print(f"[dim]Creating GIF from {start_time} ({duration}s)...[/dim]")
+    try:
+        generator = GifGenerator(output_dir)
+        result = generator.create_gif(url, start_time, duration, width=width)
+        if result.get("success"):
+            console.print(f"[green]GIF saved to: {result['output_path']}[/green]")
+            console.print(f"[dim]Size: {result['size_kb']} KB[/dim]")
+        else:
+            console.print(f"[red]Error: {result.get('error')}[/red]")
+    except Exception as e:
+        console.print(f"[red]Error: {e}[/red]")
+        raise SystemExit(1)
+
+
+@cli.command("api")
+@click.option("--host", default="0.0.0.0", help="Host address")
+@click.option("--port", "-p", default=5000, help="Port number")
+@click.option("--debug", is_flag=True, help="Debug mode")
+def api_server(host, port, debug):
+    """Start REST API server"""
+    from .api_server import run_server
+
+    console.print(f"[green]Starting API server on {host}:{port}[/green]")
+    run_server(host, port, debug)
+
+
+@cli.command("tts")
+@click.argument("url")
+@click.option("--provider", "-p", default="edge", type=click.Choice(["openai", "edge", "gtts"]))
+@click.option("--output-dir", "-d", default="output", help="Output directory")
+def text_to_speech(url, provider, output_dir):
+    """Generate audio summary using TTS"""
+    from .extractor import TranscriptExtractor
+    from .tts import TTSGenerator
+    from .config import Config
+
+    valid, msg = Config.validate()
+    if not valid:
+        console.print(f"[red]{msg}[/red]")
+        raise SystemExit(1)
+
+    console.print(f"[dim]Generating audio summary ({provider})...[/dim]")
+    try:
+        extractor = TranscriptExtractor(url)
+        extractor.extract()
+        transcript = extractor.get_plain_text()
+        generator = TTSGenerator(output_dir)
+        result = generator.generate_summary_audio(transcript, provider=provider)
+        if result.get("success"):
+            console.print(f"[green]Audio saved to: {result['output_path']}[/green]")
+        else:
+            console.print(f"[red]Error: {result.get('error')}[/red]")
+    except Exception as e:
+        console.print(f"[red]Error: {e}[/red]")
+        raise SystemExit(1)
+
+
+@cli.command("multi-summary")
+@click.argument("urls", nargs=-1, required=True)
+@click.option("--language", "-l", default="中文", help="Output language")
+@click.option("--output", "-o", help="Output file path")
+def multi_summary(urls, language, output):
+    """Summarize multiple videos together"""
+    from .multi_summary import MultiVideoSummarizer
+    from .config import Config
+
+    valid, msg = Config.validate()
+    if not valid:
+        console.print(f"[red]{msg}[/red]")
+        raise SystemExit(1)
+
+    console.print(f"[dim]Summarizing {len(urls)} videos...[/dim]")
+    try:
+        summarizer = MultiVideoSummarizer()
+        result = summarizer.summarize_multiple(list(urls), language)
+        if output:
+            with open(output, "w", encoding="utf-8") as f:
+                f.write(result)
+            console.print(f"[green]Summary saved to {output}[/green]")
+        else:
+            console.print(Panel(Markdown(result), title="Multi-Video Summary", border_style="green"))
+    except Exception as e:
+        console.print(f"[red]Error: {e}[/red]")
+        raise SystemExit(1)
+
+
+@cli.command("progress")
+@click.option("--add", "-a", help="Add video to tracking")
+@click.option("--complete", "-c", help="Mark video as completed")
+@click.option("--stats", is_flag=True, help="Show statistics")
+@click.option("--export", "-e", help="Export to file")
+def progress_cmd(add, complete, stats, export):
+    """Track learning progress"""
+    from .progress import ProgressTracker
+
+    tracker = ProgressTracker()
+
+    if add:
+        result = tracker.add_video(add, status="to_watch")
+        console.print(f"[green]Added: {add}[/green]")
+    elif complete:
+        result = tracker.add_video(complete, status="completed")
+        console.print(f"[green]Marked complete: {complete}[/green]")
+    elif stats:
+        stats_data = tracker.get_stats()
+        table = Table(title="Learning Progress")
+        table.add_column("Metric", style="cyan")
+        table.add_column("Value", style="white")
+        for key, value in stats_data.items():
+            table.add_row(key.replace("_", " ").title(), str(value))
+        console.print(table)
+    elif export:
+        data = tracker.export_data("markdown")
+        with open(export, "w", encoding="utf-8") as f:
+            f.write(data)
+        console.print(f"[green]Progress exported to {export}[/green]")
+    else:
+        videos = tracker.get_all_videos()
+        if not videos:
+            console.print("[dim]No videos tracked yet[/dim]")
+        else:
+            table = Table(title="Tracked Videos")
+            table.add_column("ID", style="cyan")
+            table.add_column("Title", style="white")
+            table.add_column("Status", style="green")
+            for v in videos[:20]:
+                table.add_row(v["id"][:11], v.get("title", "-")[:30], v["status"])
+            console.print(table)
+
+
+@cli.command()
+@click.argument("url")
+@click.option("--language", "-l", default="中文", help="Output language")
+def recommend(url, language):
+    """Get learning recommendations"""
+    from .extractor import TranscriptExtractor
+    from .recommend import VideoRecommender
+    from .config import Config
+
+    valid, msg = Config.validate()
+    if not valid:
+        console.print(f"[red]{msg}[/red]")
+        raise SystemExit(1)
+
+    with Progress(SpinnerColumn(), TextColumn("[progress.description]{task.description}"), console=console) as progress:
+        task = progress.add_task("Analyzing...", total=None)
+        try:
+            extractor = TranscriptExtractor(url)
+            extractor.extract()
+            transcript = extractor.get_plain_text()
+            progress.update(task, description="Generating recommendations...")
+            recommender = VideoRecommender()
+            result = recommender.recommend_next(transcript, language)
+            console.print(Panel(Markdown(result), title="Learning Recommendations", border_style="green"))
+        except Exception as e:
+            console.print(f"[red]Error: {e}[/red]")
+            raise SystemExit(1)
+
+
+@cli.command()
+@click.option("--add", "-a", help="Add channel to monitor")
+@click.option("--remove", "-r", help="Remove channel")
+@click.option("--check", is_flag=True, help="Check for new videos")
+@click.option("--list", "list_channels", is_flag=True, help="List monitored channels")
+def monitor(add, remove, check, list_channels):
+    """Monitor YouTube channels"""
+    from .monitor import ChannelMonitor
+
+    mon = ChannelMonitor()
+
+    if add:
+        result = mon.add_channel(add)
+        if "error" in result:
+            console.print(f"[red]{result['error']}[/red]")
+        else:
+            console.print(f"[green]Added channel: {result['name']}[/green]")
+    elif remove:
+        if mon.remove_channel(remove):
+            console.print(f"[green]Removed channel[/green]")
+        else:
+            console.print("[red]Channel not found[/red]")
+    elif check:
+        console.print("[dim]Checking for new videos...[/dim]")
+        new_videos = mon.check_new_videos()
+        if new_videos:
+            console.print(f"[green]Found {len(new_videos)} new videos:[/green]")
+            for v in new_videos:
+                console.print(f"  - {v['title']} ({v['channel']})")
+        else:
+            console.print("[dim]No new videos[/dim]")
+    elif list_channels:
+        channels = mon.get_channels()
+        if not channels:
+            console.print("[dim]No channels monitored[/dim]")
+        else:
+            table = Table(title="Monitored Channels")
+            table.add_column("Name", style="cyan")
+            table.add_column("URL", style="white")
+            for c in channels:
+                table.add_row(c["name"], c["url"])
+            console.print(table)
+    else:
+        status = mon.get_status()
+        console.print(f"Monitoring {status['channels_count']} channels")
+        console.print(f"Last check: {status['last_check'] or 'Never'}")
+
+
 def main():
     """Main entry point"""
     cli()
