@@ -90,6 +90,82 @@ AI-powered YouTube video analysis toolkit - 智能 YouTube 视频分析工具
 | **Recommendations** | Get smart video recommendations | `yt-tool recommend` |
 | **Channel Monitor** | Monitor channels for new videos | `yt-tool monitor` |
 
+### AI Deep Analysis (Phase 2 - NEW!)
+
+| Feature | Description | Command |
+|---------|-------------|---------|
+| **Video DNA** | Unique fingerprint and style analysis | `yt-tool video-dna` |
+| **Knowledge Graph** | Extract entities and relationships | `yt-tool knowledge-graph` |
+| **Argument Tracker** | Track arguments across videos | `yt-tool argument-tracker` |
+| **Entropy Analysis** | Information density metrics | `yt-tool entropy` |
+| **Cognitive Load** | Learning difficulty assessment | `yt-tool cognitive-load` |
+
+### Creative Content Generation (Phase 2 - NEW!)
+
+| Feature | Description | Command |
+|---------|-------------|---------|
+| **Voice Clone Script** | AI dubbing and TTS scripts | `yt-tool voice-clone` |
+| **Comic Generator** | Storyboard/manga/webtoon | `yt-tool comic` |
+| **Podcast Dialogue** | Multi-person podcast scripts | `yt-tool podcast-dialogue` |
+| **Interactive Story** | Branching narratives (Twine/Ink) | `yt-tool interactive-story` |
+| **Meme Generator** | Detect meme moments | `yt-tool meme` |
+
+### Learning & Memory Science (Phase 2 - NEW!)
+
+| Feature | Description | Command |
+|---------|-------------|---------|
+| **Spaced Repetition** | SM-2 algorithm flashcards | `yt-tool spaced-repetition` |
+| **Feynman Notes** | ELI5 simplified explanations | `yt-tool feynman-notes` |
+| **Cornell Notes** | Cornell note-taking format | `yt-tool cornell-notes` |
+| **Memory Palace** | Method of loci mnemonics | `yt-tool memory-palace` |
+| **Active Recall** | Retrieval practice materials | `yt-tool active-recall` |
+
+### Collaboration & Social (Phase 2 - NEW!)
+
+| Feature | Description | Command |
+|---------|-------------|---------|
+| **Collaborative Notes** | Shared annotations | `yt-tool collaborative-notes` |
+| **Study Group** | Discussion guides | `yt-tool study-group` |
+| **Discussion Generator** | Socratic/Think-Pair-Share | `yt-tool discussion` |
+| **Debate Simulator** | AI debate simulation | `yt-tool debate` |
+
+### Automation & Workflow (Phase 2 - NEW!)
+
+| Feature | Description | Command |
+|---------|-------------|---------|
+| **Workflow Automation** | IFTTT-style workflows | `yt-tool workflow` |
+| **Scheduled Reports** | Daily/weekly/monthly reports | `yt-tool scheduled-report` |
+| **Smart Playlist** | AI-curated learning playlists | `yt-tool smart-playlist` |
+| **Cross-Platform** | Bilibili/Douyin/TikTok support | `yt-tool cross-platform` |
+| **RSS Generator** | RSS/Atom/JSON feeds | `yt-tool rss` |
+
+### Visualization & Data (Phase 2 - NEW!)
+
+| Feature | Description | Command |
+|---------|-------------|---------|
+| **3D Knowledge Map** | Three.js visualization | `yt-tool knowledge-3d` |
+| **Learning Heatmap** | Activity calendar | `yt-tool learning-heatmap` |
+| **Concept Network** | Interactive vis.js network | `yt-tool concept-network` |
+| **Timeline Editor** | Video chapters (VTT/EDL) | `yt-tool timeline` |
+
+### Accessibility Suite (Phase 2 - NEW!)
+
+| Feature | Description | Command |
+|---------|-------------|---------|
+| **Sign Language Script** | Sign language interpretation | `yt-tool accessibility -f sign-language` |
+| **Audio Description** | Blind-friendly descriptions | `yt-tool accessibility -f audio-description` |
+| **Simplified Content** | Easy-read versions | `yt-tool accessibility -f simplified` |
+| **Multisensory Notes** | Multiple learning modalities | `yt-tool accessibility -f multisensory` |
+
+### Business Tools (Phase 2 - NEW!)
+
+| Feature | Description | Command |
+|---------|-------------|---------|
+| **Trend Prediction** | Content trend forecasting | `yt-tool business -f trends` |
+| **Sponsor Detection** | Identify sponsorships | `yt-tool business -f sponsors` |
+| **Copyright Check** | Copyright risk assessment | `yt-tool business -f copyright` |
+| **ROI Calculator** | Video value estimation | `yt-tool business -f roi` |
+
 ## Installation
 
 ### 1. Clone the repository
@@ -478,6 +554,68 @@ yt-tool cache --clear
 | `cache` | Manage cache |
 | `styles` | List summary styles |
 
+### AI Deep Analysis (Phase 2)
+| Command | Description |
+|---------|-------------|
+| `video-dna` | Video fingerprint analysis |
+| `knowledge-graph` | Knowledge graph generation |
+| `argument-tracker` | Track arguments across videos |
+| `entropy` | Information entropy analysis |
+| `cognitive-load` | Cognitive load assessment |
+
+### Creative Content (Phase 2)
+| Command | Description |
+|---------|-------------|
+| `voice-clone` | Voice dubbing scripts |
+| `comic` | Comic/storyboard generation |
+| `podcast-dialogue` | Podcast dialogue scripts |
+| `interactive-story` | Interactive narratives |
+| `meme` | Meme moment detection |
+
+### Learning Science (Phase 2)
+| Command | Description |
+|---------|-------------|
+| `spaced-repetition` | SM-2 flashcards |
+| `feynman-notes` | Feynman-style notes |
+| `cornell-notes` | Cornell note format |
+| `memory-palace` | Memory palace mnemonics |
+| `active-recall` | Active recall practice |
+
+### Collaboration (Phase 2)
+| Command | Description |
+|---------|-------------|
+| `collaborative-notes` | Shared annotations |
+| `study-group` | Study group guides |
+| `discussion` | Discussion formats |
+| `debate` | Debate simulation |
+
+### Automation (Phase 2)
+| Command | Description |
+|---------|-------------|
+| `workflow` | Workflow automation |
+| `scheduled-report` | Scheduled reports |
+| `smart-playlist` | AI-curated playlists |
+| `cross-platform` | Cross-platform support |
+| `rss` | RSS feed generation |
+
+### Visualization (Phase 2)
+| Command | Description |
+|---------|-------------|
+| `knowledge-3d` | 3D knowledge map |
+| `learning-heatmap` | Learning activity heatmap |
+| `concept-network` | Concept network visualization |
+| `timeline` | Timeline editor |
+
+### Accessibility (Phase 2)
+| Command | Description |
+|---------|-------------|
+| `accessibility` | Accessible content generation |
+
+### Business Tools (Phase 2)
+| Command | Description |
+|---------|-------------|
+| `business` | Business analysis tools |
+
 ## REST API
 
 Start the API server:
@@ -551,6 +689,50 @@ from yt_tool.multi_summary import MultiVideoSummarizer
 from yt_tool.progress import ProgressTracker
 from yt_tool.recommend import VideoRecommender
 from yt_tool.monitor import ChannelMonitor
+
+# Phase 2 - AI Deep Analysis
+from yt_tool.video_dna import VideoDNA
+from yt_tool.knowledge_graph import KnowledgeGraphBuilder
+from yt_tool.argument_tracker import ArgumentTracker
+from yt_tool.entropy_analyzer import EntropyAnalyzer
+from yt_tool.cognitive_load import CognitiveLoadAnalyzer
+
+# Phase 2 - Creative Content
+from yt_tool.voice_clone import VoiceCloneGenerator
+from yt_tool.comic_generator import ComicGenerator
+from yt_tool.podcast_dialogue import PodcastDialogueGenerator
+from yt_tool.interactive_story import InteractiveStoryGenerator
+from yt_tool.meme_generator import MemeGenerator
+
+# Phase 2 - Learning Science
+from yt_tool.spaced_repetition import SpacedRepetitionSystem
+from yt_tool.feynman_notes import FeynmanNotesGenerator
+from yt_tool.cornell_notes import CornellNotesGenerator
+from yt_tool.memory_palace import MemoryPalaceGenerator
+from yt_tool.active_recall import ActiveRecallGenerator
+
+# Phase 2 - Collaboration
+from yt_tool.collaborative_notes import CollaborativeNotes
+from yt_tool.study_group import StudyGroupGenerator
+from yt_tool.discussion_generator import DiscussionGenerator
+from yt_tool.debate_simulator import DebateSimulator
+
+# Phase 2 - Automation
+from yt_tool.workflow_automation import WorkflowAutomation
+from yt_tool.scheduled_reports import ScheduledReportGenerator
+from yt_tool.smart_playlist import SmartPlaylistGenerator
+from yt_tool.cross_platform import CrossPlatformAnalyzer
+from yt_tool.rss_generator import RSSFeedGenerator
+
+# Phase 2 - Visualization
+from yt_tool.knowledge_map_3d import KnowledgeMap3D
+from yt_tool.learning_heatmap import LearningHeatmap
+from yt_tool.concept_network import ConceptNetworkBuilder
+from yt_tool.timeline_editor import TimelineEditor
+
+# Phase 2 - Accessibility & Business
+from yt_tool.accessibility import AccessibilitySuite
+from yt_tool.business_tools import BusinessToolsSuite
 
 # Get video info
 video = VideoInfo("VIDEO_ID")
