@@ -78,12 +78,22 @@ cp .env.example .env
 Edit `.env`:
 
 ```env
+# Choose one or more AI providers
 OPENAI_API_KEY=your_openai_api_key_here
-# or
 ANTHROPIC_API_KEY=your_anthropic_api_key_here
+GOOGLE_API_KEY=your_google_api_key_here
 
+# Set default provider: openai, anthropic, or gemini
 AI_PROVIDER=openai
 ```
+
+**Supported AI Providers:**
+
+| Provider | Model | Features |
+|----------|-------|----------|
+| **OpenAI** | GPT-4o-mini | Fast, cost-effective |
+| **Anthropic** | Claude 3 Haiku | Strong long-context |
+| **Google Gemini** | Gemini 1.5 Flash | NotebookLM-like capabilities |
 
 ## Usage
 
@@ -318,7 +328,10 @@ downloader.download_thumbnail("VIDEO_ID")
 ## Requirements
 
 - Python 3.9+
-- OpenAI API key or Anthropic API key
+- AI API key (one of the following):
+  - OpenAI API key
+  - Anthropic API key
+  - Google API key (for Gemini)
 - FFmpeg (for audio/video download)
 
 ## License
