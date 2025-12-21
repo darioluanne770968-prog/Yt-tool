@@ -27,6 +27,13 @@ def create_app():
     from .generator import ContentGenerator
     from .quiz import QuizGenerator
     from .study_guide import StudyGuideGenerator
+    from .mindmap import MindmapGenerator
+    from .concepts import ConceptExplainer
+    from .sentiment import SentimentAnalyzer
+    from .social import SocialMediaGenerator
+    from .presentation import PresentationGenerator
+    from .cornell_notes import CornellNotesGenerator
+    from .feynman_notes import FeynmanNotesGenerator
 
     @app.route("/")
     def index():
@@ -60,12 +67,11 @@ def create_app():
 
         try:
             extractor = TranscriptExtractor(video_id)
-            extractor.extract(language_preferences=[language])
+            extractor.extract(languages=[language])
 
             return jsonify({
                 "success": True,
-                "transcript": extractor.get_plain_text(),
-                "segments": extractor.get_segments(),
+                "transcript": extractor.get_formatted(include_timestamps=False),
                 "language": extractor.language,
             })
         except Exception as e:
@@ -216,15 +222,13 @@ def create_app():
 
             return jsonify({
                 "success": True,
-                "info": {
-                    "title": info.title,
-                    "channel": info.channel,
-                    "duration": info.duration_formatted,
-                    "views": info.view_count,
-                    "likes": info.like_count,
-                    "upload_date": info.upload_date,
-                    "description": info.description[:500] if info.description else None,
-                }
+                "title": info.title,
+                "channel": info.channel,
+                "duration": info.duration_formatted,
+                "views": info.view_count,
+                "likes": info.like_count,
+                "upload_date": info.upload_date,
+                "description": info.description[:500] if info.description else None,
             })
         except Exception as e:
             return jsonify({"error": str(e)}), 500
@@ -301,6 +305,270 @@ def create_app():
             return jsonify({
                 "success": True,
                 "study_guide": guide,
+            })
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+
+    @app.route("/api/blog", methods=["POST"])
+    def generate_blog():
+        """Generate blog post from video"""
+        data = request.json
+        video_id = data.get("video_id") or data.get("url")
+        language = data.get("language", "中文")
+
+        if not video_id:
+            return jsonify({"error": "video_id is required"}), 400
+
+        try:
+            extractor = TranscriptExtractor(video_id)
+            extractor.extract()
+            transcript = extractor.get_plain_text()
+
+            generator = ContentGenerator()
+            blog = generator.generate_blog_post(transcript, language)
+
+            return jsonify({
+                "success": True,
+                "blog": blog,
+            })
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+
+    @app.route("/api/mindmap", methods=["POST"])
+    def generate_mindmap():
+        """Generate mindmap from video"""
+        data = request.json
+        video_id = data.get("video_id") or data.get("url")
+        language = data.get("language", "中文")
+        format_type = data.get("format", "markdown")
+
+        if not video_id:
+            return jsonify({"error": "video_id is required"}), 400
+
+        try:
+            extractor = TranscriptExtractor(video_id)
+            extractor.extract()
+            transcript = extractor.get_plain_text()
+
+            generator = MindmapGenerator()
+            if format_type == "mermaid":
+                mindmap = generator.generate_mermaid(transcript, language)
+            else:
+                mindmap = generator.generate(transcript, language)
+
+            return jsonify({
+                "success": True,
+                "mindmap": mindmap,
+                "format": format_type,
+            })
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+
+    @app.route("/api/podcast", methods=["POST"])
+    def generate_podcast():
+        """Generate podcast script from video"""
+        data = request.json
+        video_id = data.get("video_id") or data.get("url")
+        language = data.get("language", "中文")
+
+        if not video_id:
+            return jsonify({"error": "video_id is required"}), 400
+
+        try:
+            extractor = TranscriptExtractor(video_id)
+            extractor.extract()
+            transcript = extractor.get_plain_text()
+
+            generator = ContentGenerator()
+            podcast = generator.generate_podcast_script(transcript, language)
+
+            return jsonify({
+                "success": True,
+                "podcast": podcast,
+            })
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+
+    @app.route("/api/vocabulary", methods=["POST"])
+    def extract_vocabulary():
+        """Extract vocabulary from video"""
+        data = request.json
+        video_id = data.get("video_id") or data.get("url")
+        language = data.get("language", "中文")
+
+        if not video_id:
+            return jsonify({"error": "video_id is required"}), 400
+
+        try:
+            extractor = TranscriptExtractor(video_id)
+            extractor.extract()
+            transcript = extractor.get_plain_text()
+
+            generator = ContentGenerator()
+            vocabulary = generator.extract_vocabulary(transcript, language)
+
+            return jsonify({
+                "success": True,
+                "vocabulary": vocabulary,
+            })
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+
+    @app.route("/api/concepts", methods=["POST"])
+    def extract_concepts():
+        """Extract and explain concepts from video"""
+        data = request.json
+        video_id = data.get("video_id") or data.get("url")
+        language = data.get("language", "中文")
+
+        if not video_id:
+            return jsonify({"error": "video_id is required"}), 400
+
+        try:
+            extractor = TranscriptExtractor(video_id)
+            extractor.extract()
+            transcript = extractor.get_plain_text()
+
+            concept_exp = ConceptExplainer()
+            concepts = concept_exp.extract_concepts(transcript, language)
+
+            return jsonify({
+                "success": True,
+                "concepts": concepts,
+            })
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+
+    @app.route("/api/sentiment", methods=["POST"])
+    def analyze_sentiment():
+        """Analyze video sentiment"""
+        data = request.json
+        video_id = data.get("video_id") or data.get("url")
+        language = data.get("language", "中文")
+
+        if not video_id:
+            return jsonify({"error": "video_id is required"}), 400
+
+        try:
+            extractor = TranscriptExtractor(video_id)
+            extractor.extract()
+            transcript = extractor.get_plain_text()
+
+            analyzer = SentimentAnalyzer()
+            sentiment = analyzer.analyze(transcript, language)
+
+            return jsonify({
+                "success": True,
+                "sentiment": sentiment,
+            })
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+
+    @app.route("/api/social", methods=["POST"])
+    def generate_social():
+        """Generate social media content"""
+        data = request.json
+        video_id = data.get("video_id") or data.get("url")
+        platform = data.get("platform", "twitter")
+        language = data.get("language", "中文")
+
+        if not video_id:
+            return jsonify({"error": "video_id is required"}), 400
+
+        try:
+            extractor = TranscriptExtractor(video_id)
+            extractor.extract()
+            transcript = extractor.get_plain_text()
+
+            generator = SocialMediaGenerator()
+            if platform == "twitter":
+                content = generator.generate_twitter_thread(transcript, language)
+            elif platform == "linkedin":
+                content = generator.generate_linkedin_post(transcript, language)
+            elif platform == "xiaohongshu":
+                content = generator.generate_xiaohongshu(transcript, language)
+            else:
+                content = generator.generate_twitter_thread(transcript, language)
+
+            return jsonify({
+                "success": True,
+                "content": content,
+                "platform": platform,
+            })
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+
+    @app.route("/api/presentation", methods=["POST"])
+    def generate_presentation():
+        """Generate presentation slides"""
+        data = request.json
+        video_id = data.get("video_id") or data.get("url")
+        language = data.get("language", "中文")
+
+        if not video_id:
+            return jsonify({"error": "video_id is required"}), 400
+
+        try:
+            extractor = TranscriptExtractor(video_id)
+            extractor.extract()
+            transcript = extractor.get_plain_text()
+
+            generator = PresentationGenerator()
+            slides = generator.generate_marp_slides(transcript, language)
+
+            return jsonify({
+                "success": True,
+                "presentation": slides,
+            })
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+
+    @app.route("/api/cornell-notes", methods=["POST"])
+    def generate_cornell_notes():
+        """Generate Cornell notes"""
+        data = request.json
+        video_id = data.get("video_id") or data.get("url")
+        language = data.get("language", "中文")
+
+        if not video_id:
+            return jsonify({"error": "video_id is required"}), 400
+
+        try:
+            extractor = TranscriptExtractor(video_id)
+            extractor.extract()
+            transcript = extractor.get_plain_text()
+
+            generator = CornellNotesGenerator()
+            notes = generator.generate(transcript, language)
+
+            return jsonify({
+                "success": True,
+                "cornell_notes": notes,
+            })
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+
+    @app.route("/api/feynman-notes", methods=["POST"])
+    def generate_feynman_notes():
+        """Generate Feynman-style notes"""
+        data = request.json
+        video_id = data.get("video_id") or data.get("url")
+        language = data.get("language", "中文")
+
+        if not video_id:
+            return jsonify({"error": "video_id is required"}), 400
+
+        try:
+            extractor = TranscriptExtractor(video_id)
+            extractor.extract()
+            transcript = extractor.get_plain_text()
+
+            generator = FeynmanNotesGenerator()
+            notes = generator.generate(transcript, language)
+
+            return jsonify({
+                "success": True,
+                "feynman_notes": notes,
             })
         except Exception as e:
             return jsonify({"error": str(e)}), 500

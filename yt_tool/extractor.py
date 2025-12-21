@@ -52,13 +52,17 @@ def get_transcript(
         languages = ["zh-Hans", "zh-Hant", "zh", "en", "ja", "ko"]
 
     try:
-        transcript_list = YouTubeTranscriptApi.list_transcripts(video_id)
+        # youtube-transcript-api 1.x uses instance method
+        ytt_api = YouTubeTranscriptApi()
+        transcript_list = ytt_api.list(video_id)
 
         # Try to find a transcript in preferred languages
         for lang in languages:
             try:
                 transcript = transcript_list.find_transcript([lang])
-                return transcript.fetch(), lang
+                fetched = transcript.fetch()
+                # Convert FetchedTranscript to list of dicts
+                return [{"text": item.text, "start": item.start, "duration": item.duration} for item in fetched], lang
             except NoTranscriptFound:
                 continue
 
@@ -67,13 +71,15 @@ def get_transcript(
             # Try manually created transcripts first
             for transcript in transcript_list:
                 if not transcript.is_generated:
-                    return transcript.fetch(), transcript.language_code
+                    fetched = transcript.fetch()
+                    return [{"text": item.text, "start": item.start, "duration": item.duration} for item in fetched], transcript.language_code
         except Exception:
             pass
 
         # Fall back to auto-generated
         for transcript in transcript_list:
-            return transcript.fetch(), transcript.language_code
+            fetched = transcript.fetch()
+            return [{"text": item.text, "start": item.start, "duration": item.duration} for item in fetched], transcript.language_code
 
     except TranscriptsDisabled:
         raise Exception("Transcripts are disabled for this video")

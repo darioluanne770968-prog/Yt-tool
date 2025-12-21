@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube AI Tool - Full Version</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 50%, #16213e 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 2.8rem;
+            background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+
+        .subtitle { color: #888; font-size: 1rem; }
+
+        .input-section {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .url-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .url-input {
+            flex: 1;
+            padding: 14px 18px;
+            font-size: 1rem;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            background: rgba(0, 0, 0, 0.3);
+            color: #fff;
+            transition: border-color 0.3s;
+        }
+
+        .url-input:focus {
+            outline: none;
+            border-color: #48dbfb;
+        }
+
+        .options-row {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .option-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .option-group label { color: #888; font-size: 0.9rem; }
+
+        .option-group select, .option-group input {
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(0, 0, 0, 0.3);
+            color: #fff;
+            font-size: 0.9rem;
+        }
+
+        .category {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .category-title {
+            font-size: 1rem;
+            color: #48dbfb;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 10px;
+        }
+
+        .action-btn {
+            padding: 12px 16px;
+            font-size: 0.85rem;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .action-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Button colors by category */
+        .btn-blue { background: linear-gradient(135deg, #54a0ff, #2e86de); }
+        .btn-red { background: linear-gradient(135deg, #ff6b6b, #ee5a5a); }
+        .btn-cyan { background: linear-gradient(135deg, #48dbfb, #0abde3); }
+        .btn-yellow { background: linear-gradient(135deg, #feca57, #f39c12); }
+        .btn-purple { background: linear-gradient(135deg, #5f27cd, #341f97); }
+        .btn-teal { background: linear-gradient(135deg, #00d2d3, #01a3a4); }
+        .btn-pink { background: linear-gradient(135deg, #ff9ff3, #f368e0); }
+        .btn-green { background: linear-gradient(135deg, #1dd1a1, #10ac84); }
+        .btn-orange { background: linear-gradient(135deg, #ff9f43, #ee5a24); }
+        .btn-indigo { background: linear-gradient(135deg, #6c5ce7, #4834d4); }
+
+        .result-section {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 20px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            min-height: 300px;
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .result-title {
+            font-size: 1.1rem;
+            color: #48dbfb;
+        }
+
+        .result-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .copy-btn, .download-btn {
+            padding: 8px 14px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: background 0.3s;
+        }
+
+        .copy-btn:hover, .download-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .result-content {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            max-height: 500px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            line-height: 1.7;
+            font-size: 0.95rem;
+        }
+
+        .result-content::-webkit-scrollbar { width: 8px; }
+        .result-content::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); border-radius: 4px; }
+        .result-content::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 4px; }
+
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px;
+            color: #888;
+        }
+
+        .spinner {
+            width: 45px;
+            height: 45px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top-color: #48dbfb;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .error {
+            color: #ff6b6b;
+            background: rgba(255, 107, 107, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #ff6b6b;
+        }
+
+        .video-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .info-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .info-label { color: #888; font-size: 0.8rem; margin-bottom: 5px; }
+        .info-value { font-size: 1.05rem; font-weight: 500; }
+
+        .placeholder {
+            color: #555;
+            text-align: center;
+            padding: 80px 20px;
+        }
+
+        .flashcard {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+
+        .flashcard-q { color: #ff9ff3; font-weight: 600; margin-bottom: 10px; }
+        .flashcard-a { color: #1dd1a1; font-weight: 600; margin-bottom: 8px; }
+
+        /* QA Section */
+        .qa-input-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .qa-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            color: #fff;
+            font-size: 0.95rem;
+        }
+
+        .qa-input:focus { outline: none; border-color: #48dbfb; }
+
+        .qa-btn {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #48dbfb, #0abde3);
+            border: none;
+            border-radius: 10px;
+            color: #fff;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 2rem; }
+            .url-row { flex-direction: column; }
+            .actions { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>YouTube AI Tool</h1>
+            <p class="subtitle">AI 驱动的 YouTube 视频分析工具 - 完整版</p>
+        </header>
+
+        <div class="input-section">
+            <div class="url-row">
+                <input type="text" class="url-input" id="videoUrl" placeholder="粘贴 YouTube 视频链接...">
+            </div>
+            <div class="options-row">
+                <div class="option-group">
+                    <label>摘要风格:</label>
+                    <select id="summaryStyle">
+                        <option value="default">标准</option>
+                        <option value="brief">简短</option>
+                        <option value="detailed">详细</option>
+                        <option value="bullets">要点</option>
+                        <option value="academic">学术</option>
+                    </select>
+                </div>
+                <div class="option-group">
+                    <label>语言:</label>
+                    <select id="language">
+                        <option value="中文">中文</option>
+                        <option value="English">English</option>
+                        <option value="日本語">日本語</option>
+                        <option value="한국어">한국어</option>
+                    </select>
+                </div>
+                <div class="option-group">
+                    <label>翻译到:</label>
+                    <select id="targetLang">
+                        <option value="English">English</option>
+                        <option value="中文">中文</option>
+                        <option value="日本語">日本語</option>
+                        <option value="한국어">한국어</option>
+                        <option value="Español">Español</option>
+                        <option value="Français">Français</option>
+                    </select>
+                </div>
+                <div class="option-group">
+                    <label>社交平台:</label>
+                    <select id="socialPlatform">
+                        <option value="twitter">Twitter</option>
+                        <option value="linkedin">LinkedIn</option>
+                        <option value="xiaohongshu">小红书</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- 基础功能 -->
+        <div class="category">
+            <div class="category-title"><span>📋</span> 基础功能</div>
+            <div class="actions">
+                <button class="action-btn btn-blue" onclick="getInfo()">ℹ️ 视频信息</button>
+                <button class="action-btn btn-cyan" onclick="getTranscript()">📄 提取字幕</button>
+                <button class="action-btn btn-red" onclick="getSummary()">📝 AI 摘要</button>
+                <button class="action-btn btn-yellow" onclick="getKeypoints()">💡 关键点</button>
+                <button class="action-btn btn-purple" onclick="getChapters()">📑 章节</button>
+                <button class="action-btn btn-teal" onclick="translate()">🌐 翻译</button>
+            </div>
+        </div>
+
+        <!-- 学习工具 -->
+        <div class="category">
+            <div class="category-title"><span>📚</span> 学习工具</div>
+            <div class="actions">
+                <button class="action-btn btn-teal" onclick="getQuiz()">❓ 生成测验</button>
+                <button class="action-btn btn-pink" onclick="getFlashcards()">🎴 闪卡</button>
+                <button class="action-btn btn-green" onclick="getStudyGuide()">📖 学习指南</button>
+                <button class="action-btn btn-indigo" onclick="getConcepts()">🧠 概念解释</button>
+                <button class="action-btn btn-orange" onclick="getVocabulary()">📝 术语提取</button>
+            </div>
+        </div>
+
+        <!-- 笔记方法 -->
+        <div class="category">
+            <div class="category-title"><span>✏️</span> 笔记方法</div>
+            <div class="actions">
+                <button class="action-btn btn-blue" onclick="getCornellNotes()">📋 康奈尔笔记</button>
+                <button class="action-btn btn-green" onclick="getFeynmanNotes()">🎓 费曼笔记</button>
+            </div>
+        </div>
+
+        <!-- 内容生成 -->
+        <div class="category">
+            <div class="category-title"><span>✨</span> 内容生成</div>
+            <div class="actions">
+                <button class="action-btn btn-red" onclick="getBlog()">📰 博客文章</button>
+                <button class="action-btn btn-purple" onclick="getPodcast()">🎙️ 播客脚本</button>
+                <button class="action-btn btn-cyan" onclick="getMindmap()">🗺️ 思维导图</button>
+                <button class="action-btn btn-orange" onclick="getPresentation()">📊 PPT 演示</button>
+            </div>
+        </div>
+
+        <!-- 社交媒体 -->
+        <div class="category">
+            <div class="category-title"><span>📱</span> 社交媒体</div>
+            <div class="actions">
+                <button class="action-btn btn-blue" onclick="getSocial('twitter')">🐦 Twitter</button>
+                <button class="action-btn btn-indigo" onclick="getSocial('linkedin')">💼 LinkedIn</button>
+                <button class="action-btn btn-pink" onclick="getSocial('xiaohongshu')">📕 小红书</button>
+            </div>
+        </div>
+
+        <!-- 分析工具 -->
+        <div class="category">
+            <div class="category-title"><span>🔍</span> 分析工具</div>
+            <div class="actions">
+                <button class="action-btn btn-yellow" onclick="getSentiment()">😊 情感分析</button>
+            </div>
+        </div>
+
+        <!-- 问答 -->
+        <div class="category">
+            <div class="category-title"><span>💬</span> 智能问答</div>
+            <div class="qa-input-row">
+                <input type="text" class="qa-input" id="qaQuestion" placeholder="输入你想问的问题...">
+                <button class="qa-btn" onclick="askQuestion()">提问</button>
+            </div>
+        </div>
+
+        <!-- 结果显示 -->
+        <div class="result-section">
+            <div class="result-header">
+                <h2 class="result-title" id="resultTitle">结果</h2>
+                <div class="result-actions">
+                    <button class="copy-btn" onclick="copyResult()">📋 复制</button>
+                    <button class="download-btn" onclick="downloadResult()">💾 下载</button>
+                </div>
+            </div>
+            <div class="result-content" id="resultContent">
+                <div class="placeholder">
+                    输入 YouTube 视频链接，选择功能开始分析
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8080/api';
+        let currentResult = '';
+
+        function getUrl() {
+            const url = document.getElementById('videoUrl').value.trim();
+            if (!url) {
+                showError('请输入 YouTube 视频链接');
+                return null;
+            }
+            return url;
+        }
+
+        function getLang() {
+            return document.getElementById('language').value;
+        }
+
+        function showLoading(title) {
+            document.getElementById('resultTitle').textContent = title;
+            document.getElementById('resultContent').innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <span>正在处理中，请稍候...</span>
+                </div>
+            `;
+            setButtonsDisabled(true);
+        }
+
+        function showResult(title, content) {
+            document.getElementById('resultTitle').textContent = title;
+            currentResult = typeof content === 'string' ? content : JSON.stringify(content, null, 2);
+            document.getElementById('resultContent').textContent = currentResult;
+            setButtonsDisabled(false);
+        }
+
+        function showError(message) {
+            document.getElementById('resultContent').innerHTML = `<div class="error">${message}</div>`;
+            setButtonsDisabled(false);
+        }
+
+        function showVideoInfo(data) {
+            document.getElementById('resultTitle').textContent = '视频信息';
+            document.getElementById('resultContent').innerHTML = `
+                <div class="video-info">
+                    <div class="info-item"><div class="info-label">标题</div><div class="info-value">${data.title || '-'}</div></div>
+                    <div class="info-item"><div class="info-label">频道</div><div class="info-value">${data.channel || '-'}</div></div>
+                    <div class="info-item"><div class="info-label">时长</div><div class="info-value">${data.duration || '-'}</div></div>
+                    <div class="info-item"><div class="info-label">播放量</div><div class="info-value">${(data.views || 0).toLocaleString()}</div></div>
+                    <div class="info-item"><div class="info-label">点赞数</div><div class="info-value">${(data.likes || 0).toLocaleString()}</div></div>
+                    <div class="info-item"><div class="info-label">上传日期</div><div class="info-value">${data.upload_date || '-'}</div></div>
+                </div>
+            `;
+            currentResult = `标题: ${data.title}\n频道: ${data.channel}\n时长: ${data.duration}\n播放量: ${data.views}\n点赞: ${data.likes}`;
+            setButtonsDisabled(false);
+        }
+
+        function showFlashcards(cards) {
+            document.getElementById('resultTitle').textContent = '学习闪卡';
+            if (!cards || cards.length === 0) {
+                document.getElementById('resultContent').innerHTML = '<div class="placeholder">没有生成闪卡</div>';
+                setButtonsDisabled(false);
+                return;
+            }
+            const html = cards.map((card, i) => `
+                <div class="flashcard">
+                    <div class="flashcard-q">问题 ${i + 1}</div>
+                    <div style="margin-bottom: 15px;">${card.question || card.front || ''}</div>
+                    <div class="flashcard-a">答案</div>
+                    <div style="color: #aaa;">${card.answer || card.back || ''}</div>
+                </div>
+            `).join('');
+            document.getElementById('resultContent').innerHTML = html;
+            currentResult = cards.map((c, i) => `Q${i+1}: ${c.question}\nA${i+1}: ${c.answer}`).join('\n\n');
+            setButtonsDisabled(false);
+        }
+
+        function setButtonsDisabled(disabled) {
+            document.querySelectorAll('.action-btn, .qa-btn').forEach(btn => btn.disabled = disabled);
+        }
+
+        async function apiCall(endpoint, body) {
+            try {
+                const response = await fetch(`${API_BASE}${endpoint}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || '请求失败');
+                }
+                return await response.json();
+            } catch (error) {
+                if (error.message.includes('Failed to fetch')) {
+                    throw new Error('无法连接到服务器，请确保 API 服务正在运行');
+                }
+                throw error;
+            }
+        }
+
+        // 基础功能
+        async function getInfo() {
+            const url = getUrl(); if (!url) return;
+            showLoading('获取视频信息...');
+            try {
+                const data = await apiCall('/info', { url });
+                showVideoInfo(data);
+            } catch (e) { showError(e.message); }
+        }
+
+        async function getTranscript() {
+            const url = getUrl(); if (!url) return;
+            showLoading('提取字幕...');
+            try {
+                const data = await apiCall('/transcript', { url });
+                showResult('字幕内容', data.transcript);
+            } catch (e) { showError(e.message); }
+        }
+
+        async function getSummary() {
+            const url = getUrl(); if (!url) return;
+            const style = document.getElementById('summaryStyle').value;
+            showLoading('生成 AI 摘要...');
+            try {
+                const data = await apiCall('/summary', { url, style, language: getLang() });
+                showResult('AI 摘要', data.summary);
+            } catch (e) { showError(e.message); }
+        }
+
+        async function getKeypoints() {
+            const url = getUrl(); if (!url) return;
+            showLoading('提取关键点...');
+            try {
+                const data = await apiCall('/keypoints', { url, language: getLang() });
+                showResult('关键点', data.keypoints);
+            } catch (e) { showError(e.message); }
+        }
+
+        async function getChapters() {
+            const url = getUrl(); if (!url) return;
+            showLoading('生成章节...');
+            try {
+                const data = await apiCall('/chapters', { url, language: getLang() });
+                showResult('章节时间戳', data.chapters);
+            } catch (e) { showError(e.message); }
+        }
+
+        async function translate() {
+            const url = getUrl(); if (!url) return;
+            const target = document.getElementById('targetLang').value;
+            showLoading('翻译中...');
+            try {
+                const data = await apiCall('/translate', { url, target_language: target });
+                showResult(`翻译结果 (${target})`, data.translation);
+            } catch (e) { showError(e.message); }
+        }
+
+        // 学习工具
+        async function getQuiz() {
+            const url = getUrl(); if (!url) return;
+            showLoading('生成测验...');
+            try {
+                const data = await apiCall('/quiz', { url, language: getLang(), num_questions: 5 });
+                showResult('测验题目', data.quiz);
+            } catch (e) { showError(e.message); }
+        }
+
+        async function getFlashcards() {
+            const url = getUrl(); if (!url) return;
+            showLoading('生成闪卡...');
+            try {
+                const data = await apiCall('/flashcards', { url, language: getLang() });
+                showFlashcards(data.flashcards);
+            } catch (e) { showError(e.message); }
+        }
+
+        async function getStudyGuide() {
+            const url = getUrl(); if (!url) return;
+            showLoading('生成学习指南...');
+            try {
+                const data = await apiCall('/study-guide', { url, language: getLang() });
+                showResult('学习指南', data.study_guide);
+            } catch (e) { showError(e.message); }
+        }
+
+        async function getConcepts() {
+            const url = getUrl(); if (!url) return;
+            showLoading('提取概念...');
+            try {
+                const data = await apiCall('/concepts', { url, language: getLang() });
+                showResult('概念解释', data.concepts);
+            } catch (e) { showError(e.message); }
+        }
+
+        async function getVocabulary() {
+            const url = getUrl(); if (!url) return;
+            showLoading('提取术语...');
+            try {
+                const data = await apiCall('/vocabulary', { url, language: getLang() });
+                showResult('术语表', data.vocabulary);
+            } catch (e) { showError(e.message); }
+        }
+
+        // 笔记方法
+        async function getCornellNotes() {
+            const url = getUrl(); if (!url) return;
+            showLoading('生成康奈尔笔记...');
+            try {
+                const data = await apiCall('/cornell-notes', { url, language: getLang() });
+                showResult('康奈尔笔记', data.cornell_notes);
+            } catch (e) { showError(e.message); }
+        }
+
+        async function getFeynmanNotes() {
+            const url = getUrl(); if (!url) return;
+            showLoading('生成费曼笔记...');
+            try {
+                const data = await apiCall('/feynman-notes', { url, language: getLang() });
+                showResult('费曼笔记', data.feynman_notes);
+            } catch (e) { showError(e.message); }
+        }
+
+        // 内容生成
+        async function getBlog() {
+            const url = getUrl(); if (!url) return;
+            showLoading('生成博客文章...');
+            try {
+                const data = await apiCall('/blog', { url, language: getLang() });
+                showResult('博客文章', data.blog);
+            } catch (e) { showError(e.message); }
+        }
+
+        async function getPodcast() {
+            const url = getUrl(); if (!url) return;
+            showLoading('生成播客脚本...');
+            try {
+                const data = await apiCall('/podcast', { url, language: getLang() });
+                showResult('播客脚本', data.podcast);
+            } catch (e) { showError(e.message); }
+        }
+
+        async function getMindmap() {
+            const url = getUrl(); if (!url) return;
+            showLoading('生成思维导图...');
+            try {
+                const data = await apiCall('/mindmap', { url, language: getLang() });
+                showResult('思维导图', data.mindmap);
+            } catch (e) { showError(e.message); }
+        }
+
+        async function getPresentation() {
+            const url = getUrl(); if (!url) return;
+            showLoading('生成 PPT...');
+            try {
+                const data = await apiCall('/presentation', { url, language: getLang() });
+                showResult('PPT 演示稿', data.presentation);
+            } catch (e) { showError(e.message); }
+        }
+
+        // 社交媒体
+        async function getSocial(platform) {
+            const url = getUrl(); if (!url) return;
+            const platformNames = { twitter: 'Twitter', linkedin: 'LinkedIn', xiaohongshu: '小红书' };
+            showLoading(`生成 ${platformNames[platform]} 内容...`);
+            try {
+                const data = await apiCall('/social', { url, platform, language: getLang() });
+                showResult(`${platformNames[platform]} 内容`, data.content);
+            } catch (e) { showError(e.message); }
+        }
+
+        // 分析工具
+        async function getSentiment() {
+            const url = getUrl(); if (!url) return;
+            showLoading('分析情感...');
+            try {
+                const data = await apiCall('/sentiment', { url, language: getLang() });
+                showResult('情感分析', data.sentiment);
+            } catch (e) { showError(e.message); }
+        }
+
+        // 问答
+        async function askQuestion() {
+            const url = getUrl(); if (!url) return;
+            const question = document.getElementById('qaQuestion').value.trim();
+            if (!question) {
+                showError('请输入问题');
+                return;
+            }
+            showLoading('思考中...');
+            try {
+                const data = await apiCall('/qa', { url, question, language: getLang() });
+                showResult(`问答: ${question}`, data.answer);
+            } catch (e) { showError(e.message); }
+        }
+
+        // 工具函数
+        function copyResult() {
+            navigator.clipboard.writeText(currentResult || document.getElementById('resultContent').textContent).then(() => {
+                const btn = document.querySelector('.copy-btn');
+                btn.textContent = '✓ 已复制';
+                setTimeout(() => btn.textContent = '📋 复制', 2000);
+            });
+        }
+
+        function downloadResult() {
+            const content = currentResult || document.getElementById('resultContent').textContent;
+            const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `yt-tool-result-${Date.now()}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // 回车键提交
+        document.getElementById('videoUrl').addEventListener('keypress', e => {
+            if (e.key === 'Enter') getSummary();
+        });
+        document.getElementById('qaQuestion').addEventListener('keypress', e => {
+            if (e.key === 'Enter') askQuestion();
+        });
+    </script>
+</body>
+</html>

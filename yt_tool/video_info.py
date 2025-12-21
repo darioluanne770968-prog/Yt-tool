@@ -146,6 +146,14 @@ class VideoInfo:
     def view_count(self) -> int:
         return self.info.get("view_count", 0)
 
+    @property
+    def like_count(self) -> int:
+        return self.info.get("like_count", 0)
+
+    @property
+    def upload_date(self) -> str:
+        return self.info.get("upload_date", "")
+
     def format_summary(self) -> str:
         """Format video info as summary text"""
         info = self.info
