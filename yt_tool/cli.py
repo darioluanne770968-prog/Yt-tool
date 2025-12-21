@@ -3026,6 +3026,777 @@ def business_cmd(url, feature, language, output):
             raise SystemExit(1)
 
 
+# ============================================
+# Phase 3 Advanced Feature Commands
+# ============================================
+
+# --- AI Teaching Assistant ---
+
+@cli.command("tutor")
+@click.argument("url")
+@click.option("--question", "-q", help="Ask tutor a question")
+@click.option("--language", "-l", default="中文", help="Output language")
+def tutor_cmd(url, question, language):
+    """Start AI tutoring session"""
+    from .extractor import TranscriptExtractor
+    from .virtual_tutor import VirtualTutor
+    from .config import Config
+
+    valid, msg = Config.validate()
+    if not valid:
+        console.print(f"[red]{msg}[/red]")
+        raise SystemExit(1)
+
+    with Progress(SpinnerColumn(), TextColumn("[progress.description]{task.description}"), console=console) as progress:
+        task = progress.add_task("Starting tutor session...", total=None)
+        try:
+            extractor = TranscriptExtractor(url)
+            extractor.extract()
+            transcript = extractor.get_plain_text()
+            tutor = VirtualTutor()
+            if question:
+                tutor.current_context = transcript
+                result = tutor.ask_tutor(question, language)
+                console.print(Panel(Markdown(result["answer"]), title="AI Tutor", border_style="cyan"))
+            else:
+                result = tutor.start_session(transcript, language=language)
+                console.print(Panel(Markdown(result["welcome_message"]), title="AI Tutor Session", border_style="cyan"))
+        except Exception as e:
+            console.print(f"[red]Error: {e}[/red]")
+            raise SystemExit(1)
+
+
+@cli.command("diagnose")
+@click.argument("url")
+@click.option("--language", "-l", default="中文", help="Output language")
+@click.option("--output", "-o", help="Output file path")
+def diagnose_cmd(url, language, output):
+    """Diagnose learning challenges for content"""
+    from .extractor import TranscriptExtractor
+    from .learning_diagnosis import LearningDiagnostics
+    from .config import Config
+    import json
+
+    valid, msg = Config.validate()
+    if not valid:
+        console.print(f"[red]{msg}[/red]")
+        raise SystemExit(1)
+
+    with Progress(SpinnerColumn(), TextColumn("[progress.description]{task.description}"), console=console) as progress:
+        task = progress.add_task("Diagnosing content...", total=None)
+        try:
+            extractor = TranscriptExtractor(url)
+            extractor.extract()
+            transcript = extractor.get_plain_text()
+            diagnostics = LearningDiagnostics()
+            result = diagnostics.diagnose_from_transcript(transcript, "video content", language)
+            if output:
+                with open(output, "w", encoding="utf-8") as f:
+                    f.write(json.dumps(result, ensure_ascii=False, indent=2))
+                console.print(f"[green]Diagnosis saved to {output}[/green]")
+            else:
+                console.print(Panel(Markdown(result["diagnosis"]), title="Learning Diagnosis", border_style="blue"))
+        except Exception as e:
+            console.print(f"[red]Error: {e}[/red]")
+            raise SystemExit(1)
+
+
+@cli.command("predict-time")
+@click.argument("url")
+@click.option("--level", "-l", default="intermediate", type=click.Choice(["beginner", "intermediate", "advanced"]))
+@click.option("--language", "-lang", default="中文", help="Output language")
+def predict_time_cmd(url, level, language):
+    """Predict learning time for content"""
+    from .extractor import TranscriptExtractor
+    from .knowledge_predictor import KnowledgePredictor
+    from .config import Config
+
+    valid, msg = Config.validate()
+    if not valid:
+        console.print(f"[red]{msg}[/red]")
+        raise SystemExit(1)
+
+    with Progress(SpinnerColumn(), TextColumn("[progress.description]{task.description}"), console=console) as progress:
+        task = progress.add_task("Predicting learning time...", total=None)
+        try:
+            extractor = TranscriptExtractor(url)
+            extractor.extract()
+            transcript = extractor.get_plain_text()
+            predictor = KnowledgePredictor()
+            result = predictor.predict_learning_time(transcript, level, language)
+            console.print(Panel(Markdown(result["prediction"]), title="Learning Time Prediction", border_style="green"))
+        except Exception as e:
+            console.print(f"[red]Error: {e}[/red]")
+            raise SystemExit(1)
+
+
+@cli.command("qa-bot")
+@click.argument("url")
+@click.option("--question", "-q", required=True, help="Question to ask")
+@click.option("--language", "-l", default="中文", help="Output language")
+def qa_bot_cmd(url, question, language):
+    """Ask the QA bot a question about video"""
+    from .extractor import TranscriptExtractor
+    from .qa_bot import QABot
+    from .config import Config
+
+    valid, msg = Config.validate()
+    if not valid:
+        console.print(f"[red]{msg}[/red]")
+        raise SystemExit(1)
+
+    with Progress(SpinnerColumn(), TextColumn("[progress.description]{task.description}"), console=console) as progress:
+        task = progress.add_task("Processing question...", total=None)
+        try:
+            extractor = TranscriptExtractor(url)
+            extractor.extract()
+            transcript = extractor.get_plain_text()
+            bot = QABot()
+            bot.load_video_content(url, transcript)
+            result = bot.ask(question, url, language)
+            console.print(Panel(Markdown(result["answer"]), title="QA Bot Answer", border_style="cyan"))
+        except Exception as e:
+            console.print(f"[red]Error: {e}[/red]")
+            raise SystemExit(1)
+
+
+# --- Logic Analysis ---
+
+@cli.command("logic")
+@click.argument("url")
+@click.option("--type", "-t", "analysis_type", default="structure", type=click.Choice(["structure", "fallacies", "assumptions", "causal", "full"]))
+@click.option("--language", "-l", default="中文", help="Output language")
+@click.option("--output", "-o", help="Output file path")
+def logic_cmd(url, analysis_type, language, output):
+    """Analyze logical structure and reasoning"""
+    from .extractor import TranscriptExtractor
+    from .logic_analyzer import LogicAnalyzer
+    from .config import Config
+
+    valid, msg = Config.validate()
+    if not valid:
+        console.print(f"[red]{msg}[/red]")
+        raise SystemExit(1)
+
+    with Progress(SpinnerColumn(), TextColumn("[progress.description]{task.description}"), console=console) as progress:
+        task = progress.add_task("Analyzing logic...", total=None)
+        try:
+            extractor = TranscriptExtractor(url)
+            extractor.extract()
+            transcript = extractor.get_plain_text()
+            analyzer = LogicAnalyzer()
+            if analysis_type == "fallacies":
+                result = analyzer.detect_fallacies(transcript, language)
+                content = result["fallacies"]
+            elif analysis_type == "assumptions":
+                result = analyzer.extract_hidden_assumptions(transcript, language)
+                content = result["hidden_assumptions"]
+            elif analysis_type == "causal":
+                result = analyzer.build_causal_graph(transcript, language)
+                content = result["causal_graph"]
+            elif analysis_type == "full":
+                result = analyzer.generate_logic_report(transcript, language)
+                content = result["report"]
+            else:
+                result = analyzer.analyze_argument_structure(transcript, language)
+                content = result["analysis"]
+            if output:
+                with open(output, "w", encoding="utf-8") as f:
+                    f.write(content)
+                console.print(f"[green]Analysis saved to {output}[/green]")
+            else:
+                console.print(Panel(Markdown(content[:3000] + "..." if len(content) > 3000 else content), title=f"Logic Analysis ({analysis_type})", border_style="yellow"))
+        except Exception as e:
+            console.print(f"[red]Error: {e}[/red]")
+            raise SystemExit(1)
+
+
+# --- Multimedia Tools ---
+
+@cli.command("thumbnail-design")
+@click.argument("url")
+@click.option("--style", "-s", default="modern", help="Design style")
+@click.option("--language", "-l", default="中文", help="Output language")
+@click.option("--output", "-o", help="Output file path")
+def thumbnail_design_cmd(url, style, language, output):
+    """Generate thumbnail design prompts"""
+    from .extractor import TranscriptExtractor
+    from .multimedia_creator import MultimediaCreator
+    from .config import Config
+
+    valid, msg = Config.validate()
+    if not valid:
+        console.print(f"[red]{msg}[/red]")
+        raise SystemExit(1)
+
+    with Progress(SpinnerColumn(), TextColumn("[progress.description]{task.description}"), console=console) as progress:
+        task = progress.add_task("Designing thumbnail...", total=None)
+        try:
+            extractor = TranscriptExtractor(url)
+            extractor.extract()
+            transcript = extractor.get_plain_text()
+            creator = MultimediaCreator()
+            result = creator.generate_thumbnail_prompt(transcript, style=style, language=language)
+            content = result["thumbnail_designs"]
+            if output:
+                with open(output, "w", encoding="utf-8") as f:
+                    f.write(content)
+                console.print(f"[green]Design saved to {output}[/green]")
+            else:
+                console.print(Panel(Markdown(content[:3000] + "..." if len(content) > 3000 else content), title="Thumbnail Design", border_style="magenta"))
+        except Exception as e:
+            console.print(f"[red]Error: {e}[/red]")
+            raise SystemExit(1)
+
+
+@cli.command("music-recommend")
+@click.argument("url")
+@click.option("--language", "-l", default="中文", help="Output language")
+def music_recommend_cmd(url, language):
+    """Recommend background music"""
+    from .extractor import TranscriptExtractor
+    from .multimedia_creator import MultimediaCreator
+    from .config import Config
+
+    valid, msg = Config.validate()
+    if not valid:
+        console.print(f"[red]{msg}[/red]")
+        raise SystemExit(1)
+
+    with Progress(SpinnerColumn(), TextColumn("[progress.description]{task.description}"), console=console) as progress:
+        task = progress.add_task("Analyzing for music...", total=None)
+        try:
+            extractor = TranscriptExtractor(url)
+            extractor.extract()
+            transcript = extractor.get_plain_text()
+            creator = MultimediaCreator()
+            result = creator.recommend_background_music(transcript, language)
+            console.print(Panel(Markdown(result["music_recommendations"][:3000]), title="Music Recommendations", border_style="green"))
+        except Exception as e:
+            console.print(f"[red]Error: {e}[/red]")
+            raise SystemExit(1)
+
+
+@cli.command("highlights")
+@click.argument("url")
+@click.option("--language", "-l", default="中文", help="Output language")
+@click.option("--output", "-o", help="Output file path")
+def highlights_cmd(url, language, output):
+    """Detect video highlight moments"""
+    from .extractor import TranscriptExtractor
+    from .multimedia_creator import MultimediaCreator
+    from .config import Config
+
+    valid, msg = Config.validate()
+    if not valid:
+        console.print(f"[red]{msg}[/red]")
+        raise SystemExit(1)
+
+    with Progress(SpinnerColumn(), TextColumn("[progress.description]{task.description}"), console=console) as progress:
+        task = progress.add_task("Detecting highlights...", total=None)
+        try:
+            extractor = TranscriptExtractor(url)
+            extractor.extract()
+            transcript = extractor.get_plain_text()
+            creator = MultimediaCreator()
+            result = creator.detect_highlight_moments(transcript, language)
+            content = result["highlights"]
+            if output:
+                with open(output, "w", encoding="utf-8") as f:
+                    f.write(content)
+                console.print(f"[green]Highlights saved to {output}[/green]")
+            else:
+                console.print(Panel(Markdown(content[:3000] + "..." if len(content) > 3000 else content), title="Video Highlights", border_style="yellow"))
+        except Exception as e:
+            console.print(f"[red]Error: {e}[/red]")
+            raise SystemExit(1)
+
+
+# --- Gamification ---
+
+@cli.command("game-stats")
+def game_stats_cmd():
+    """Show gamification stats"""
+    from .gamification import GamificationSystem
+
+    game = GamificationSystem()
+    stats = game.get_stats()
+
+    table = Table(title="Learning Game Stats")
+    table.add_column("Stat", style="cyan")
+    table.add_column("Value", style="green")
+    table.add_row("Level", str(stats["level"]))
+    table.add_row("XP", f"{stats['xp']} / {stats['xp'] + stats['xp_to_next_level']}")
+    table.add_row("Total XP", str(stats["total_xp"]))
+    table.add_row("Streak", f"{stats['streak']} days")
+    table.add_row("Longest Streak", f"{stats['longest_streak']} days")
+    table.add_row("Coins", str(stats["coins"]))
+    table.add_row("Achievements", f"{stats['achievements_unlocked']}/{stats['total_achievements']}")
+    console.print(table)
+
+
+@cli.command("achievements")
+def achievements_cmd():
+    """Show available achievements"""
+    from .gamification import GamificationSystem
+
+    game = GamificationSystem()
+    achievements = game.get_available_achievements()
+
+    table = Table(title="Achievements")
+    table.add_column("", width=3)
+    table.add_column("Name", style="cyan")
+    table.add_column("Description")
+    table.add_column("XP", style="yellow")
+    table.add_column("Status")
+
+    for ach in achievements:
+        status = "[green]✓ Unlocked[/green]" if ach["unlocked"] else "[dim]Locked[/dim]"
+        table.add_row(ach["icon"], ach["name"], ach["description"], str(ach["xp"]), status)
+
+    console.print(table)
+
+
+@cli.command("daily-challenges")
+def daily_challenges_cmd():
+    """Show daily challenges"""
+    from .gamification import GamificationSystem
+
+    game = GamificationSystem()
+    challenges = game.generate_daily_challenges()
+
+    table = Table(title="Daily Challenges")
+    table.add_column("Challenge", style="cyan")
+    table.add_column("Progress")
+    table.add_column("XP", style="yellow")
+    table.add_column("Coins", style="green")
+
+    for ch in challenges:
+        progress = f"{ch['progress']}/{ch['target']}"
+        table.add_row(ch["title"], progress, str(ch["xp_reward"]), str(ch["coin_reward"]))
+
+    console.print(table)
+
+
+# --- AI Writer ---
+
+@cli.command("paper-outline")
+@click.argument("url")
+@click.option("--topic", "-t", default="", help="Paper topic")
+@click.option("--type", "paper_type", default="research", type=click.Choice(["research", "review", "essay"]))
+@click.option("--language", "-l", default="中文", help="Output language")
+@click.option("--output", "-o", help="Output file path")
+def paper_outline_cmd(url, topic, paper_type, language, output):
+    """Generate academic paper outline"""
+    from .extractor import TranscriptExtractor
+    from .ai_writer import AIWriter
+    from .config import Config
+
+    valid, msg = Config.validate()
+    if not valid:
+        console.print(f"[red]{msg}[/red]")
+        raise SystemExit(1)
+
+    with Progress(SpinnerColumn(), TextColumn("[progress.description]{task.description}"), console=console) as progress:
+        task = progress.add_task("Generating outline...", total=None)
+        try:
+            extractor = TranscriptExtractor(url)
+            extractor.extract()
+            transcript = extractor.get_plain_text()
+            writer = AIWriter()
+            result = writer.generate_paper_outline(transcript, topic, paper_type, language)
+            content = result["outline"]
+            if output:
+                with open(output, "w", encoding="utf-8") as f:
+                    f.write(content)
+                console.print(f"[green]Outline saved to {output}[/green]")
+            else:
+                console.print(Panel(Markdown(content[:3000] + "..." if len(content) > 3000 else content), title="Paper Outline", border_style="blue"))
+        except Exception as e:
+            console.print(f"[red]Error: {e}[/red]")
+            raise SystemExit(1)
+
+
+@cli.command("lesson-plan")
+@click.argument("url")
+@click.option("--grade", "-g", default="high_school", help="Grade level")
+@click.option("--duration", "-d", default=45, help="Duration in minutes")
+@click.option("--language", "-l", default="中文", help="Output language")
+@click.option("--output", "-o", help="Output file path")
+def lesson_plan_cmd(url, grade, duration, language, output):
+    """Generate teaching lesson plan"""
+    from .extractor import TranscriptExtractor
+    from .ai_writer import AIWriter
+    from .config import Config
+
+    valid, msg = Config.validate()
+    if not valid:
+        console.print(f"[red]{msg}[/red]")
+        raise SystemExit(1)
+
+    with Progress(SpinnerColumn(), TextColumn("[progress.description]{task.description}"), console=console) as progress:
+        task = progress.add_task("Generating lesson plan...", total=None)
+        try:
+            extractor = TranscriptExtractor(url)
+            extractor.extract()
+            transcript = extractor.get_plain_text()
+            writer = AIWriter()
+            result = writer.generate_lesson_plan(transcript, grade, duration, language)
+            content = result["lesson_plan"]
+            if output:
+                with open(output, "w", encoding="utf-8") as f:
+                    f.write(content)
+                console.print(f"[green]Lesson plan saved to {output}[/green]")
+            else:
+                console.print(Panel(Markdown(content[:3000] + "..." if len(content) > 3000 else content), title="Lesson Plan", border_style="green"))
+        except Exception as e:
+            console.print(f"[red]Error: {e}[/red]")
+            raise SystemExit(1)
+
+
+@cli.command("review-article")
+@click.argument("url")
+@click.option("--style", "-s", default="professional", type=click.Choice(["academic", "casual", "professional", "blog"]))
+@click.option("--language", "-l", default="中文", help="Output language")
+@click.option("--output", "-o", help="Output file path")
+def review_article_cmd(url, style, language, output):
+    """Generate review article"""
+    from .extractor import TranscriptExtractor
+    from .ai_writer import AIWriter
+    from .config import Config
+
+    valid, msg = Config.validate()
+    if not valid:
+        console.print(f"[red]{msg}[/red]")
+        raise SystemExit(1)
+
+    with Progress(SpinnerColumn(), TextColumn("[progress.description]{task.description}"), console=console) as progress:
+        task = progress.add_task("Writing review...", total=None)
+        try:
+            extractor = TranscriptExtractor(url)
+            extractor.extract()
+            transcript = extractor.get_plain_text()
+            writer = AIWriter()
+            result = writer.generate_book_review(transcript, style, language)
+            content = result["review"]
+            if output:
+                with open(output, "w", encoding="utf-8") as f:
+                    f.write(content)
+                console.print(f"[green]Review saved to {output}[/green]")
+            else:
+                console.print(Panel(Markdown(content[:3000] + "..." if len(content) > 3000 else content), title="Review Article", border_style="magenta"))
+        except Exception as e:
+            console.print(f"[red]Error: {e}[/red]")
+            raise SystemExit(1)
+
+
+# --- Learning Analytics ---
+
+@cli.command("analytics")
+@click.option("--report", "-r", is_flag=True, help="Generate full report")
+@click.option("--trends", "-t", is_flag=True, help="Show learning trends")
+@click.option("--best-time", "-b", is_flag=True, help="Find best learning time")
+@click.option("--language", "-l", default="中文", help="Output language")
+def analytics_cmd(report, trends, best_time, language):
+    """View learning analytics"""
+    from .learning_analytics import LearningAnalytics
+
+    analytics = LearningAnalytics()
+
+    if report:
+        result = analytics.generate_analytics_report(language)
+        console.print(Panel(Markdown(result["report"]), title="Analytics Report", border_style="blue"))
+    elif trends:
+        result = analytics.get_learning_trends(30)
+        console.print(f"[cyan]Learning Trends (Last 30 days)[/cyan]")
+        console.print(f"Trend: {result['trend']}")
+        console.print(f"Active days: {result['active_days']}")
+        console.print(f"Total time: {result['total_time']} minutes")
+    elif best_time:
+        result = analytics.get_best_learning_time()
+        console.print(f"[cyan]Best Learning Time[/cyan]")
+        console.print(result["recommendation"])
+    else:
+        console.print("[dim]Use --report, --trends, or --best-time[/dim]")
+
+
+# --- Smart Reminders ---
+
+@cli.command("reminders")
+@click.option("--today", "-t", is_flag=True, help="Show today's agenda")
+@click.option("--schedule", "-s", help="Schedule review for topic")
+@click.option("--goal", "-g", help="Set a learning goal")
+@click.option("--deadline", "-d", help="Goal deadline (YYYY-MM-DD)")
+def reminders_cmd(today, schedule, goal, deadline):
+    """Manage smart reminders"""
+    from .smart_reminder import SmartReminder
+    import json
+
+    reminder = SmartReminder()
+
+    if today:
+        agenda = reminder.get_today_agenda()
+        console.print(f"[cyan]{agenda['daily_message']}[/cyan]")
+        if agenda["reviews_due"]:
+            console.print(f"\n[yellow]Reviews due: {len(agenda['reviews_due'])}[/yellow]")
+        if agenda["goal_reminders"]:
+            for g in agenda["goal_reminders"]:
+                console.print(f"  • {g['message']}")
+    elif schedule:
+        result = reminder.schedule_ebbinghaus_review(schedule)
+        console.print(f"[green]Scheduled {len(result['review_schedule'])} reviews for '{schedule}'[/green]")
+    elif goal and deadline:
+        result = reminder.set_goal(goal, deadline)
+        console.print(f"[green]Goal set: {goal} (due {deadline})[/green]")
+    else:
+        console.print("[dim]Use --today, --schedule, or --goal with --deadline[/dim]")
+
+
+# --- Content Quality ---
+
+@cli.command("quality")
+@click.argument("url")
+@click.option("--type", "-t", "assess_type", default="full", type=click.Choice(["teaching", "reliability", "depth", "originality", "audience", "full"]))
+@click.option("--language", "-l", default="中文", help="Output language")
+@click.option("--output", "-o", help="Output file path")
+def quality_cmd(url, assess_type, language, output):
+    """Assess content quality"""
+    from .extractor import TranscriptExtractor
+    from .content_quality import ContentQualityAssessor
+    from .config import Config
+
+    valid, msg = Config.validate()
+    if not valid:
+        console.print(f"[red]{msg}[/red]")
+        raise SystemExit(1)
+
+    with Progress(SpinnerColumn(), TextColumn("[progress.description]{task.description}"), console=console) as progress:
+        task = progress.add_task("Assessing quality...", total=None)
+        try:
+            extractor = TranscriptExtractor(url)
+            extractor.extract()
+            transcript = extractor.get_plain_text()
+            assessor = ContentQualityAssessor()
+            if assess_type == "teaching":
+                result = assessor.assess_teaching_effectiveness(transcript, language)
+                content = result["assessment"]
+            elif assess_type == "reliability":
+                result = assessor.evaluate_information_reliability(transcript, language)
+                content = result["reliability_assessment"]
+            elif assess_type == "depth":
+                result = assessor.assess_content_depth(transcript, language=language)
+                content = result["depth_assessment"]
+            elif assess_type == "originality":
+                result = assessor.detect_originality(transcript, language)
+                content = result["originality_assessment"]
+            elif assess_type == "audience":
+                result = assessor.evaluate_audience_match(transcript, language=language)
+                content = result["audience_match"]
+            else:
+                result = assessor.generate_quality_report(transcript, language)
+                content = result["quality_report"]
+            if output:
+                with open(output, "w", encoding="utf-8") as f:
+                    f.write(content)
+                console.print(f"[green]Assessment saved to {output}[/green]")
+            else:
+                console.print(Panel(Markdown(content[:3000] + "..." if len(content) > 3000 else content), title=f"Quality Assessment ({assess_type})", border_style="yellow"))
+        except Exception as e:
+            console.print(f"[red]Error: {e}[/red]")
+            raise SystemExit(1)
+
+
+# --- Collaboration ---
+
+@cli.command("watch-party")
+@click.argument("url")
+@click.option("--create", "-c", is_flag=True, help="Create watch party")
+@click.option("--host", "-h", default="Host", help="Host name")
+def watch_party_cmd(url, create, host):
+    """Create a watch party"""
+    from .collaboration_hub import CollaborationHub
+
+    hub = CollaborationHub()
+
+    if create:
+        party = hub.create_watch_party(url, "Video Watch Party", host)
+        console.print(f"[green]Watch party created![/green]")
+        console.print(f"Room ID: [cyan]{party['room_id']}[/cyan]")
+        console.print(f"Share this ID with others to join")
+    else:
+        console.print("[dim]Use --create to start a watch party[/dim]")
+
+
+@cli.command("annotate")
+@click.argument("url")
+@click.option("--add", "-a", help="Add annotation")
+@click.option("--timestamp", "-t", default=0.0, help="Video timestamp")
+@click.option("--user", "-u", default="User", help="Your name")
+@click.option("--list", "list_all", is_flag=True, help="List annotations")
+def annotate_cmd(url, add, timestamp, user, list_all):
+    """Manage video annotations"""
+    from .collaboration_hub import CollaborationHub
+    import json
+
+    hub = CollaborationHub()
+
+    if add:
+        result = hub.create_shared_annotation(url, user, timestamp, add)
+        console.print(f"[green]Annotation added at {timestamp}s[/green]")
+    elif list_all:
+        annotations = hub.get_video_annotations(url)
+        if annotations:
+            for ann in annotations:
+                console.print(f"[{ann['timestamp']}s] {ann['user']}: {ann['text']}")
+        else:
+            console.print("[dim]No annotations yet[/dim]")
+    else:
+        console.print("[dim]Use --add to annotate or --list to view[/dim]")
+
+
+# --- Cross-modal ---
+
+@cli.command("to-podcast")
+@click.argument("url")
+@click.option("--language", "-l", default="中文", help="Output language")
+@click.option("--output", "-o", help="Output file path")
+def to_podcast_cmd(url, language, output):
+    """Convert video to podcast script"""
+    from .extractor import TranscriptExtractor
+    from .cross_modal import CrossModalConverter
+    from .config import Config
+
+    valid, msg = Config.validate()
+    if not valid:
+        console.print(f"[red]{msg}[/red]")
+        raise SystemExit(1)
+
+    with Progress(SpinnerColumn(), TextColumn("[progress.description]{task.description}"), console=console) as progress:
+        task = progress.add_task("Converting to podcast...", total=None)
+        try:
+            extractor = TranscriptExtractor(url)
+            extractor.extract()
+            transcript = extractor.get_plain_text()
+            converter = CrossModalConverter()
+            result = converter.video_to_podcast_audio(transcript, language=language)
+            content = result["podcast_script"]
+            if output:
+                with open(output, "w", encoding="utf-8") as f:
+                    f.write(content)
+                console.print(f"[green]Podcast script saved to {output}[/green]")
+            else:
+                console.print(Panel(Markdown(content[:3000] + "..." if len(content) > 3000 else content), title="Podcast Script", border_style="cyan"))
+        except Exception as e:
+            console.print(f"[red]Error: {e}[/red]")
+            raise SystemExit(1)
+
+
+@cli.command("to-ebook")
+@click.argument("url")
+@click.option("--language", "-l", default="中文", help="Output language")
+@click.option("--output", "-o", help="Output file path")
+def to_ebook_cmd(url, language, output):
+    """Convert video to ebook chapter"""
+    from .extractor import TranscriptExtractor
+    from .cross_modal import CrossModalConverter
+    from .config import Config
+
+    valid, msg = Config.validate()
+    if not valid:
+        console.print(f"[red]{msg}[/red]")
+        raise SystemExit(1)
+
+    with Progress(SpinnerColumn(), TextColumn("[progress.description]{task.description}"), console=console) as progress:
+        task = progress.add_task("Converting to ebook...", total=None)
+        try:
+            extractor = TranscriptExtractor(url)
+            extractor.extract()
+            transcript = extractor.get_plain_text()
+            converter = CrossModalConverter()
+            result = converter.video_to_ebook(transcript, language=language)
+            content = result["ebook_content"]
+            if output:
+                with open(output, "w", encoding="utf-8") as f:
+                    f.write(content)
+                console.print(f"[green]Ebook chapter saved to {output}[/green]")
+            else:
+                console.print(Panel(Markdown(content[:3000] + "..." if len(content) > 3000 else content), title="Ebook Chapter", border_style="green"))
+        except Exception as e:
+            console.print(f"[red]Error: {e}[/red]")
+            raise SystemExit(1)
+
+
+@cli.command("infographic")
+@click.argument("url")
+@click.option("--language", "-l", default="中文", help="Output language")
+@click.option("--output", "-o", help="Output file path")
+def infographic_cmd(url, language, output):
+    """Generate infographic design"""
+    from .extractor import TranscriptExtractor
+    from .cross_modal import CrossModalConverter
+    from .config import Config
+
+    valid, msg = Config.validate()
+    if not valid:
+        console.print(f"[red]{msg}[/red]")
+        raise SystemExit(1)
+
+    with Progress(SpinnerColumn(), TextColumn("[progress.description]{task.description}"), console=console) as progress:
+        task = progress.add_task("Designing infographic...", total=None)
+        try:
+            extractor = TranscriptExtractor(url)
+            extractor.extract()
+            transcript = extractor.get_plain_text()
+            converter = CrossModalConverter()
+            result = converter.content_to_infographic(transcript, language)
+            content = result["infographic_design"]
+            if output:
+                with open(output, "w", encoding="utf-8") as f:
+                    f.write(content)
+                console.print(f"[green]Infographic design saved to {output}[/green]")
+            else:
+                console.print(Panel(Markdown(content[:3000] + "..." if len(content) > 3000 else content), title="Infographic Design", border_style="magenta"))
+        except Exception as e:
+            console.print(f"[red]Error: {e}[/red]")
+            raise SystemExit(1)
+
+
+@cli.command("storyboard")
+@click.argument("url")
+@click.option("--duration", "-d", default=5, help="Target duration in minutes")
+@click.option("--language", "-l", default="中文", help="Output language")
+@click.option("--output", "-o", help="Output file path")
+def storyboard_cmd(url, duration, language, output):
+    """Generate video storyboard"""
+    from .extractor import TranscriptExtractor
+    from .cross_modal import CrossModalConverter
+    from .config import Config
+
+    valid, msg = Config.validate()
+    if not valid:
+        console.print(f"[red]{msg}[/red]")
+        raise SystemExit(1)
+
+    with Progress(SpinnerColumn(), TextColumn("[progress.description]{task.description}"), console=console) as progress:
+        task = progress.add_task("Creating storyboard...", total=None)
+        try:
+            extractor = TranscriptExtractor(url)
+            extractor.extract()
+            transcript = extractor.get_plain_text()
+            converter = CrossModalConverter()
+            result = converter.text_to_video_storyboard(transcript, duration, language)
+            content = result["storyboard"]
+            if output:
+                with open(output, "w", encoding="utf-8") as f:
+                    f.write(content)
+                console.print(f"[green]Storyboard saved to {output}[/green]")
+            else:
+                console.print(Panel(Markdown(content[:3000] + "..." if len(content) > 3000 else content), title="Video Storyboard", border_style="yellow"))
+        except Exception as e:
+            console.print(f"[red]Error: {e}[/red]")
+            raise SystemExit(1)
+
+
 def main():
     """Main entry point"""
     cli()
